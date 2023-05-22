@@ -7,6 +7,7 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <!--JavaScript at end of body for optimized loading-->
       <script type="text/javascript" src="js/materialize.min.js"></script>
+      <script type="text/javascript" src="js/Persona.js"></script>
       <script type="text/javascript" src="js/main.js"></script>
       
     </head>
@@ -28,11 +29,37 @@
                 <br/>
                 <div class="row">
                     <div class="input-field col s12 m12 l12 xl12">
-                        <textarea id="textarea_1" class="materialize-textarea" style="height: 150px;" readonly></textarea>
+                        <textarea id="textarea_1" class="materialize-textarea" style="height: 150px;" readonly></textarea>    
+                        <label for="textarea_1">Detalle</label>
                     </div>
-                    <div class="col s4 m4 l2 xl2">
-                        <button class="btn waves-effect waves-light button-view" onclick="SayHello();" name="hello_button">PRESS ME</button>
+                    
+                    <div class="input-field col s4">
+                        <input id="input_nombre"  type="text" class="materialize-input" style="height: 80px;"  data-length="10">   
+                        <label for="input_nombre">Nombre</label>
                     </div>
+                    <div class="input-field col s4">
+                        <input id="input_apellido"  type="text" class="materialize-input" style="height: 80px;" >   
+                        <label for="input_apellido">Apellido</label>
+                    </div>
+                    <div class="input-field col s4">
+                        <input id="input_documento"  type="number" class="materialize-input" style="height: 80px;" >   
+                        <label for="input_documento">Documento</label>
+                    </div>
+                    
+                    
+                    <div class="col s3 m3 l3 xl2">
+                        <button class="btn waves-effect waves-light button-view" id="button_add">ADD</button>
+                    </div>
+                    <div class="col s3 m3 l3 xl2">
+                        <button class="btn waves-effect waves-light button-view" id="button_show">SHOW</button>
+                    </div>
+                    <div class="col s3 m3 l3 xl2">
+                        <button class="btn waves-effect waves-light button-view" id="button_hide">HIDE</button>
+                    </div>
+                    <div class="col s3 m3 l3 xl2">
+                        <button class="btn waves-effect waves-light button-view" id="button_reset">RESET</button>
+                    </div>
+                    
                 </div>
             </div>	
         </main>
