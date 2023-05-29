@@ -1,3 +1,5 @@
+declare var M:any;
+
 enum ElementId {
     textarea_1 = "textarea_1",
 
@@ -100,6 +102,12 @@ class Main implements EventListenerObject{
                 this.handleButtonReset();
                 this.handleButtonHide(ElementId.textarea_1);
                 break
+
+            case "range_field":
+               var range = <HTMLInputElement> document.getElementById('range_field');
+               var valor = <HTMLInputElement> document.getElementById('label_slider');
+               console.log(range.value)
+               valor.value = range.value;
         }
     }
 
@@ -130,7 +138,10 @@ class Main implements EventListenerObject{
 }
 
 
-window.addEventListener("load", ()=>{    
+window.addEventListener("load", ()=>{   
+    
+    M.updateTextFields();
+   
     addListener(ElementId.button_add, EventName.click);
     addListener(ElementId.button_show, EventName.click);
     addListener(ElementId.button_reset, EventName.click);
@@ -139,10 +150,14 @@ window.addEventListener("load", ()=>{
     addListener(ElementId.input_apellido, EventName.keypress );
     addListener(ElementId.input_documento, EventName.keypress );
     addListener(ElementId.input_nombre, EventName.keypress );
+
+    var rangeField = document.getElementById('range_field');
+    rangeField.addEventListener("change", Main.getInstance())
+
+   M.toast({html: 'Pagina Lista!'})
 });
 
 function addListener(elementId:ElementId, eventName:EventName){
-    
     var boton: HTMLElement = document.getElementById(elementId)
     if(boton)
         boton.addEventListener(eventName, Main.getInstance())
