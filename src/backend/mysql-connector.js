@@ -21,5 +21,4 @@ connection.connect(function(err) {
 });
 
 module.exports = connection;
-
 //=======[ End of file ]=======================================================

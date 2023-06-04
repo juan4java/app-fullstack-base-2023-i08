@@ -4,7 +4,8 @@ var PORT    = 3000;
 
 var express = require('express');
 var app     = express();
-var utils   = require('./mysql-connector');
+var dataAccess = require('./database-access');
+var connection = require('./mysql-connector');
 
 // to parse application/json
 app.use(express.json()); 
@@ -12,8 +13,10 @@ app.use(express.json());
 app.use(express.static('/home/node/app/static/'));
 
 //=======[ Main module code ]==================================================
-
-app.get('/devices/', function(req, res, next) {
+/**
+ * obtener Dispositivos de prueba
+ */
+app.get('/devices/test/', function(req, res, next) {
     devices = [
         { 
             'id': 1, 
@@ -31,6 +34,32 @@ app.get('/devices/', function(req, res, next) {
         },
     ]
     res.send(JSON.stringify(devices)).status(200);
+});
+
+/**
+ * Obtener Dispositivos desde base de datos
+ */
+app.get('/devices/', function(req, res, next) {
+   
+    var sql = "select * from Devices";
+    connection.query(sql, function (err, result) {
+        if (err) {
+            console.error('Error while connect to DB: ' + err.stack);
+            res.send((JSON.stringify("NO_DATA") )).status(200);
+        } else {
+            res.send((JSON.stringify(result))).status(200);
+        }
+    });    
+});
+
+/**
+ * Obtener Dispositivos desde base de datos
+ */
+app.get('/devices/external', function(req, res, next) {
+    console.log("getdevices")
+    var devices = dataAccess.getDevices();
+    console.log(devices)
+    res.send((JSON.stringify(devices))).status(200);
 });
 
 app.listen(PORT, function(req, res) {
