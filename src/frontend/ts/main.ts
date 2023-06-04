@@ -1,5 +1,8 @@
 declare var M:any;
 
+/**
+ * Enum para ids de elementos
+ */
 enum ElementId {
     textarea_1 = "textarea_1",
 
@@ -14,19 +17,28 @@ enum ElementId {
     button_list = "button_list",
     
     range_field = "range_field",
-    label_slider = "label_slider"
+    label_slider = "label_slider",
+
+    div_device_list = "div_device_list"
 }
 
+/**
+ * Enum para eventos
+ */
 enum EventName {
     keypress = "keypress",
     click = "click",
     change = "change"
 }
 
-class Main implements EventListenerObject{
+/**
+ * Class main para la app
+ */
+class Main implements EventListenerObject, HttpCallback{
+    private service:services = new services
     private static total:number = 0;
-    private personaArray:Array<Persona> = new Array();
     static main:Main;
+
     
     static getInstance(){
         if( this.main == undefined)
@@ -36,22 +48,15 @@ class Main implements EventListenerObject{
 
     private constructor(){
         console.log(`Mi constructor main`)
+        //Cargo los devices
+        this.getDevices()
     }
 
     /**
      * MAneja al boton agregar
      */
     private handleButtonAdd(){
-        let pers = this.getPersona()
-        var persona = new Persona( pers.a, pers.n, pers.d);
-        if(persona.isValid()) {
-            this.personaArray.push(persona);
-            alert(`Persona agregada ${persona.toString()} , total de personas: ${this.personaArray.length}`);
-            
-            this.resetElements(ElementId.input_apellido,ElementId.input_nombre,ElementId.input_documento)
-        } else {
-            alert(`Fallo al agregar`);
-        }
+        alert(`Fallo al agregar`);
     }
 
     /**
@@ -136,12 +141,10 @@ class Main implements EventListenerObject{
      * Manejador de eventos para listar datos que provienen del backend
      */
     private handleButtonList() {
-        console.log("manejando boton listar")    
-        
+        console.log("manejando boton listar") 
     }
 
     private handleButtonReset() {
-        this.personaArray = new Array();
     }
 
     private handleInput(event: any) {
@@ -152,12 +155,6 @@ class Main implements EventListenerObject{
     }
 
     private handleButtonShow(elementId:ElementId) {
-        let current_value = document.getElementById(elementId) as HTMLInputElement;
-        let new_value = "";
-        this.personaArray.forEach(e => {
-            new_value = new_value + e.toString() + "\n";
-        });
-        document.getElementById(elementId).innerHTML = new_value;
     }
     
     private handleButtonHide(elementId:ElementId) {
@@ -169,23 +166,51 @@ class Main implements EventListenerObject{
      * Recupero mediante AJAX datos al BackEnd y lo informo por consola.
      */
     private getDevices(){
-        var xmlReq = new XMLHttpRequest();
-        xmlReq.onreadystatechange = () => {
-            if(xmlReq.readyState == 4){
-                if(xmlReq.status == 200){
-                    console.log("llegue", xmlReq.responseText)
-                } else {
-                    console.log("mo llegue")
-                }
-            } 
-        }
-        xmlReq.open("GET", "http://localhost:8000/devices", true)
-        xmlReq.send()
+        this.service.getDevices(this)
+    }
+
+    /**
+     * Manejador de respuestas a datos provenientes de backend
+     * @param response
+     */
+    handleServiceResponse(response: string) {
+        var array = JSON.parse(response)
+        var deviceListDiv: HTMLElement = document.getElementById(ElementId.div_device_list)
+        
+        var deviceList = ""
+        array.forEach(e => {
+            var leftIcon = `folder`
+            var estado = e.state * 100
+            var rigthIcon
+            
+            if(estado == 0){
+                rigthIcon =`flash_off </i> Apagado`
+            } else if(estado == 100){
+                rigthIcon =`flash_on </i> encendido`
+            } else {
+                rigthIcon =`flash_on </i> encendido al ${estado}%`
+            }
+            
+            deviceList = 
+                `${deviceList}
+                   <ul class="collection" id="ul_device_${e.id}">
+                   <li class="collection-item avatar">
+                       <i class="material-icons circle">${leftIcon}</i>
+                       <span class="title">${e.id} - ${e.name}</span>
+                       <p>${e.description}<br>
+                       </p>
+                       <a href="#!" class="content"><i class="material-icons">${rigthIcon}</a>
+                       <a href="#!" class="secondary-content"><i class="material-icons">edit</i></a>
+                       </li>
+                   </ul>        
+                   `     
+        });
+    
+        deviceListDiv.innerHTML = deviceList;
     }
 }
 
 window.addEventListener("load", ()=>{   
-    
     initMaterialize();
    
     addListener(ElementId.button_add, EventName.click);
