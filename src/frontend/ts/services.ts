@@ -8,7 +8,7 @@ enum HTTP_METHOD {
 class services {
     private static HOST:string = "http://localhost:8000"
 
-    public getDevices(callback:HTTPCallback){
+    public getDevices(callback:HttpCallback){
         
         var xmlReq = new XMLHttpRequest();
         xmlReq.onreadystatechange = () => {
