@@ -1,12 +1,17 @@
+enum typeEnum {
+    ON_OFF = "Encendido - Apagado",
+    ON_DIAL_OFF = "Reguble - Apagado",
+}
+
 class device {
     
-    private id:number
-    private nombre:string
-    private descripcion:string
-    private estado:boolean
-    private tipo:boolean
+    public id:number
+    public name:string
+    public description:string
+    public state:number
+    public type:boolean
     
-    constructor(id?:number, nombre?:string, descripcion?:string, estado?:boolean, tipo?:boolean){
+    constructor(id?:number, nombre?:string, descripcion?:string, estado?:number, tipo?:boolean){
     }
 
     public isValid():boolean{
@@ -15,8 +20,10 @@ class device {
 
     public toString(): string{
         return `id: ${this.id} ,
-                nombre: ${this.nombre} ,
-                descripcion: ${this.descripcion}, 
-                estado:  ${this.estado}, 
-                tipo: ${this.tipo}`;    }
+                nombre: ${this.name} ,
+                descripcion: ${this.description}, 
+                estado:  ${this.state}, 
+                tipo: ${this.type}`;    }
+
+    
 }

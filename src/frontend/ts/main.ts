@@ -4,22 +4,27 @@ declare var M:any;
  * Enum para ids de elementos
  */
 enum ElementId {
-    textarea_1 = "textarea_1",
 
-    input_nombre = "input_nombre",
-    input_apellido = "input_apellido",
-    input_documento = "input_documento",
-    
-    button_add = "button_add",
-    button_reset = "button_reset",
-    button_hide = "button_hide",
-    button_show = "button_show",
-    button_list = "button_list",
-    
+    input_name = "input_name",
+    input_description = "input_description",
+    input_type = "input_type",
+    input_state = "input_state",
+
+    button_cancel = "button_cancel",
+    button_save = "button_save",
+    button_delete = "button_delete",
+
     range_field = "range_field",
     label_slider = "label_slider",
 
-    div_device_list = "div_device_list"
+    div_device_list = "div_device_list",
+
+    modal_create = "modal_create",
+    modal_delete = "modal_delete",
+    modal_help = "modal_help",
+
+    checkbox_state = "checkbox_state",
+    label_state = "label_state"
 }
 
 /**
@@ -28,7 +33,8 @@ enum ElementId {
 enum EventName {
     keypress = "keypress",
     click = "click",
-    change = "change"
+    change = "change",
+    onmouseover = "onmouseover"
 }
 
 /**
@@ -36,10 +42,22 @@ enum EventName {
  */
 class Main implements EventListenerObject, HttpCallback{
     private service:services = new services
-    private static total:number = 0;
-    static main:Main;
+    private static total:number = 0
+    private deviceArray:device[]
+    static main:Main
 
+    static TOAST_PAGE_LOADED:string = "Pagina cargada!"
+    static TOAST_DEVICE_ON:string = "Se encendio el dispositivo"
+    static TOAST_DEVICE_OFF:string = "Se apago el dispositivo"
+    static TOAST_DEVICE_DELETED:string = "Se borro el dispositivo"
+    static TOAST_DEVICE_UPDATED:string = "Se actualizo el dispositivo"
+    static TOAST_DEVICE_CREATED:string = "Se creo el dispositivo"
+    static TOAST_DEVICE_CREATE_FIELD_REQUIRED:string = "Todos los campos son requeridos!"
     
+    /**
+     * Uso una unica instancia.
+     * @returns
+     */
     static getInstance(){
         if( this.main == undefined)
             this.main = new Main();
@@ -51,38 +69,7 @@ class Main implements EventListenerObject, HttpCallback{
         //Cargo los devices
         this.getDevices()
     }
-
-    /**
-     * MAneja al boton agregar
-     */
-    private handleButtonAdd(){
-        alert(`Fallo al agregar`);
-    }
-
-    /**
-     * Recupera una persona cargada en la pagina
-     * @returns 
-     */
-    getPersona(){
-        var apellido = document.getElementById(ElementId.input_apellido) as HTMLInputElement
-        var nombre = document.getElementById(ElementId.input_nombre) as HTMLInputElement
-        var documento = document.getElementById(ElementId.input_documento) as HTMLInputElement
-        
-        return {"a":apellido.value, "n":nombre.value, "d":parseInt(documento.value)}
-    }
-
-    /**
-     * Limpia los datos del array
-     * @param elements 
-     */
-    resetElements(...elements:ElementId[]){
-        
-        elements.forEach(element => {
-            var e = document.getElementById(element) as HTMLInputElement
-            e.value = ""
-        });
-    }
-
+      
     /**
      * Manejador de eventos
      * @param event 
@@ -91,38 +78,152 @@ class Main implements EventListenerObject, HttpCallback{
         console.log(`evento ${event.target.id}`)
 
         switch(event.target.id){
-            case ElementId.button_add:
-                this.handleButtonAdd();
-                break
-
-            case ElementId.input_nombre:
-            case ElementId.input_apellido:
-            case ElementId.input_documento:
-                this.handleInput(event);    
-                break
-
-            case ElementId.button_show:
-                this.handleButtonShow(ElementId.textarea_1);
-                break
-            
-            case ElementId.button_hide:
-                this.handleButtonHide(ElementId.textarea_1);
-                break
-            
-            case ElementId.button_reset:
-                this.handleButtonReset();
-                this.handleButtonHide(ElementId.textarea_1);
-                break
-
             case ElementId.range_field:
                 this.updateRangeValueInLabel(event.target.id, ElementId.label_slider);
                 break
 
-            case ElementId.button_list:
-                this.handleButtonList();
-                this.getDevices()
+            case ElementId.button_delete:
+                this.handleButtonConfirmDelete();
+                showToast(Main.TOAST_DEVICE_DELETED);
                 break
+                        
+            case ElementId.button_save:
+                var d = this.getNewDeviceModal();
+                
+                if(d.name && d.description && d.type > 0){
+                    var elem = document.getElementById(ElementId.modal_create);
+                    var instance = M.Modal.getInstance(elem);
+                    instance.close()
+                    this.resetNewDeviceModal()
+                } else {
+                    showToast(Main.TOAST_DEVICE_CREATE_FIELD_REQUIRED);
+                }
+                break
+
+            case ElementId.checkbox_state:
+                this.handleDeviceChangeState(ElementId.checkbox_state, ElementId.label_state, false);
+                break
+                
+            default:    
+                if(event.target.id.startsWith("href_status_")){
+                    this.handleDeviceOnOff(event.target.id);
+                } else if(event.target.id.startsWith("href_delete_")){
+                    this.handleDeleteIconClick();
+                } else if(event.target.id.startsWith("checkbox_state_")){
+                    var id = this.getTargetIdNumber(event.target.id)
+                    this.handleDeviceChangeState(event.target.id, `label_state_${id}`, false);
+                }              
         }
+    }
+
+    /**
+     * Maneja el click de eliminar un dispositivo
+     */
+    private handleDeleteIconClick() {
+        var modal = document.getElementById(ElementId.modal_delete);
+        var instance = M.Modal.getInstance(modal);
+        instance.open();
+    }
+
+    /**
+     * Maneja el evento de apagado encendido, actualizacion de icono  y texto
+     * @param targetId 
+     */
+    private handleDeviceOnOff(targetId: string) {
+        var icon = document.getElementById(targetId);
+        if (icon.innerHTML.includes("flash_off")) {
+            var valueOn = `<i class="material-icons">flash_on</i>Apagar`;
+            icon.innerHTML = valueOn;
+            showToast(Main.TOAST_DEVICE_ON);
+        } else {
+            var valueOn = `<i class="material-icons">flash_off</i>Encender`;
+            icon.innerHTML = valueOn;
+            showToast(Main.TOAST_DEVICE_OFF);
+        }
+    }
+
+    /**
+     * Recupero el id del nombre del evento.
+     * @param eventId 
+     * @returns 
+     */
+    private getTargetIdNumber(eventId:string){
+        var elements:string[] = eventId.split("_")
+        var id = elements[elements.length-1]
+        return id
+    }
+
+    /**
+     * ACtualizar el label para el switch, o resetear el componente a un estado "Apagado"
+     * @param elementId 
+     * @param labelId 
+     * @param reset 
+     */
+    private handleDeviceChangeState(elementId:string, labelId:string,reset:boolean) {
+        var state = <HTMLInputElement>document.getElementById(elementId);
+        var label = <HTMLInputElement>document.getElementById(labelId);
+        
+        if(reset){
+            state.value = ""
+            label.innerHTML = "Apagado"
+        } else {
+            label.innerHTML = (state.checked) ? "Encendido" : "Apagado";
+        }
+    }
+
+    /**
+     * Manejador de evento para el boton borrar
+     */
+    private handleButtonConfirmDelete() {
+        var modal = document.getElementById(ElementId.modal_delete);
+        var instance = M.Modal.getInstance(modal);
+        instance.close()
+        this.showProgressBar()
+        this.getDevices()
+    }
+
+    /**
+     * Cargo en lugar de la lista de dispositivos, un progress bar 
+     */
+    private showProgressBar() {
+        var deviceListDiv: HTMLElement = document.getElementById(ElementId.div_device_list)
+        deviceListDiv.innerHTML =  `<div class="progress">
+                                        <div class="indeterminate"></div>
+                                    </div>`
+    }
+
+    /**
+     * Recupera un dispositivo del modal crear
+     * @returns 
+     */
+    private getNewDeviceModal(){
+        var name = <HTMLInputElement> document.getElementById(ElementId.input_name);
+        var description = <HTMLInputElement> document.getElementById(ElementId.input_description);
+        var type = <HTMLSelectElement> document.getElementById(ElementId.input_type);
+        var state = <HTMLInputElement> document.getElementById(ElementId.checkbox_state);
+       
+        return {"name":name.value,
+                "description":description.value,
+                "type": type.selectedIndex,
+                "state":state.checked
+            }
+    }
+
+    /**
+     * Limpia los datos que esten previamente cargados en el modal de creacion
+     */
+    private resetNewDeviceModal(){
+        var name = <HTMLInputElement> document.getElementById(ElementId.input_name);
+        var description = <HTMLInputElement> document.getElementById(ElementId.input_description);
+        var type = <HTMLSelectElement> document.getElementById(ElementId.input_type);
+        var state = <HTMLInputElement> document.getElementById(ElementId.checkbox_state);
+       
+        name.value = ""
+        description.value = ""
+        type.selectedIndex = 0
+        state.checked = false
+
+        this.handleDeviceChangeState(ElementId.checkbox_state, ElementId.label_state, true)
     }
 
     /**
@@ -131,35 +232,10 @@ class Main implements EventListenerObject, HttpCallback{
      * @param elementId 
      * @param elementLabel 
      */
-    updateRangeValueInLabel(elementId:ElementId,elementLabel:ElementId ) {
+    private updateRangeValueInLabel(elementId:ElementId,elementLabel:ElementId ) {
         var range = <HTMLInputElement> document.getElementById(elementId);
         var label = <HTMLInputElement> document.getElementById(elementLabel);
         label.value = range.value;
-    }
-
-    /**
-     * Manejador de eventos para listar datos que provienen del backend
-     */
-    private handleButtonList() {
-        console.log("manejando boton listar") 
-    }
-
-    private handleButtonReset() {
-    }
-
-    private handleInput(event: any) {
-        var value = document.getElementById(event.target.id) as HTMLInputElement;
-        if (value.value.length >= 10) {
-            console.log(`User is tiping more than 10 characters`);
-        }
-    }
-
-    private handleButtonShow(elementId:ElementId) {
-    }
-    
-    private handleButtonHide(elementId:ElementId) {
-        let current = document.getElementById(elementId) as HTMLInputElement;
-        document.getElementById(elementId).innerHTML = "";
     }
 
     /**
@@ -173,69 +249,271 @@ class Main implements EventListenerObject, HttpCallback{
      * Manejador de respuestas a datos provenientes de backend
      * @param response
      */
-    handleServiceResponse(response: string) {
+    public handleServiceResponse(response: string) {
         var array = JSON.parse(response)
+        this.deviceArray = array
         var deviceListDiv: HTMLElement = document.getElementById(ElementId.div_device_list)
         
         var deviceList = ""
-        array.forEach(e => {
-            var leftIcon = `folder`
-            var estado = e.state * 100
-            var rigthIcon
-            
-            if(estado == 0){
-                rigthIcon =`flash_off </i> Apagado`
-            } else if(estado == 100){
-                rigthIcon =`flash_on </i> encendido`
+        array.forEach((e) => {
+            var leftIcon = `cloud_done`
+            var estado:boolean = e.state == 0;
+            var stateOnOff
+            var stateMessage
+            var messageIcon
+            var barIcon
+
+            if(estado){
+                barIcon =`close`
+                stateOnOff =`flash_off`
+                messageIcon =`Apagado`
+                stateMessage =`Encender`
             } else {
-                rigthIcon =`flash_on </i> encendido al ${estado}%`
+                barIcon =`check`
+                stateOnOff =`flash_on`
+                messageIcon =`Encendido`
+                stateMessage =`Apagar`
             }
-            
-            deviceList = 
-                `${deviceList}
-                   <ul class="collection" id="ul_device_${e.id}">
-                   <li class="collection-item avatar">
-                       <i class="material-icons circle">${leftIcon}</i>
-                       <span class="title">${e.id} - ${e.name}</span>
-                       <p>${e.description}<br>
-                       </p>
-                       <a href="#!" class="content"><i class="material-icons">${rigthIcon}</a>
-                       <a href="#!" class="secondary-content"><i class="material-icons">edit</i></a>
-                       </li>
-                   </ul>        
-                   `     
+                // } else {
+            //     barIcon =`check`
+            //     rigthIcon =`flash_on`
+            //     rigthIcon =`Encendido al ${estado}%`
+            //     message =`Apagar`
+            // }
+
+            deviceList =    `${deviceList}
+                            <li>
+                                <div class="collapsible-header">
+                                    <i class="material-icons ">chevron_right</i><span class="title">${e.id}-${e.name}-${e.description}</span>
+                                    <span class="badge">${messageIcon}</span><i class="material-icons ">${barIcon}</i>
+                                </div>
+
+                                <div class="collapsible-body"> 
+                                    <ul class="collection" id="ul_device_${e.id}">
+                                        <li class="collection-item avatar">
+                                            <i class="material-icons circle blue" id="icon_${e.id}">cloud_done</i>
+                                            <span class="title">${e.description}</span>
+                                            <br>
+                                            
+                                            <a href="#!" class="content" id="href_status_${e.id}"><i class="material-icons">${stateOnOff}</i>${stateMessage}</a>
+
+                                            <a href="#!" class="secondary-content"><i class="material-icons" id="href_delete_${e.id}">delete</i></a>
+                                            <a href="#modal_edit_${e.id}" class="waves-effect waves-light modal-trigger">Editar</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <!-- Modal Trigger -->
+                                ${this.getHtmlModalEdit(e)}
+                            </li>
+                            `;
         });
-    
-        deviceListDiv.innerHTML = deviceList;
+
+        deviceListDiv.innerHTML = `<ul class="collapsible">
+                                        ${deviceList}
+                                    </ul>`;
+
+        //Agregp listener para los elementos que requieren una accion de la lista de dispositivos
+        array.forEach(e => {
+            var elems = document.getElementById(`modal_edit_${e.id}`);
+            var instances = M.Modal.init(elems, {
+                "outDuration":500,
+                "endingTop":"10%"});
+
+            var iconE: HTMLElement = document.getElementById(`href_status_${e.id}`)
+            iconE.addEventListener(EventName.click, Main.getInstance())
+
+            var iconE: HTMLElement = document.getElementById(`href_delete_${e.id}`)
+            iconE.addEventListener(EventName.click, Main.getInstance())
+
+            var iconE: HTMLElement = document.getElementById(`checkbox_state_${e.id}`)
+            iconE.addEventListener(EventName.click, Main.getInstance())
+        });
+
+        var elemsC = document.querySelectorAll('select');
+        M.FormSelect.init(elemsC, {});
+
+        var elems = document.querySelectorAll('.collapsible');
+        elems.forEach(e => {
+            var instances = M.Collapsible.init(e, {
+                accordion: true
+              });
+        });
+    }
+
+
+    /**
+     * Aca armo el modal para la edicion de un dispositivo.
+     * @param e 
+     * @param name 
+     * @returns 
+     */
+    private getHtmlModalEdit(e:device) {
+        
+        var labelState = e.state == 1 ? "Encendido" :"Apagado"
+        var type = e.type == true 
+        var modal =
+        `    
+        <!-- Modal Structure -->
+        <div id="modal_edit_${e.id}" class="modal">
+            <div class="modal-content">
+            <h4>Editar dispostivo: ${e.name}</h4>
+
+            <div class="row">
+
+            <!-- Campo Name-->
+            <div class="input-field col s6">
+                <i class="material-icons prefix">input</i>
+                <input  value="${e.name}" id="input_name_${e.id}" type="text" class="validate">
+                <label  class="active" for="input_name" >Nombre</label>
+            </div>
+
+            <!-- Campo Description-->s
+            <div class="input-field col s6">
+                <i class="material-icons prefix">input</i>
+                <input  value="${e.description}" id="input_description_${e.id}" type="text" class="validate">
+                <label  class="active" for="input_name" >Descripcion</label>
+            </div>
+
+            <!-- Campo Type-->
+            <div class="input-field col s6">
+                <i class="material-icons prefix">settings</i>
+                <select  id="input_type_${e.id}>
+                `
+                if(type){
+                    modal = modal + this.getHtmlTypeSelectedVariable()
+                } else {
+                    modal = modal + this.getHtmlTypeSelectedOnOff()
+                }
+                modal = modal + `
+                </select>
+                <label>Tipo</label>
+            </div>
+
+            <!-- Campo Status-->
+            <div class="input-field col s1">
+                <i class="material-icons prefix">power</i>
+            </div>
+
+            <div class="input-field col s5">
+                <div class="switch">
+                    <div>
+                        <div>
+                            <label id="label_state_${e.id}">${labelState}</label>
+                            <div>
+                                <label>
+                                    
+                                    `
+                                    if( e.state == 1){
+                                        modal = modal + this.getHtmlStateOn(e.id)
+                                    } else {
+                                        modal = modal + this.getHtmlStateOff(e.id)
+                                    }
+                                    modal = modal + `
+                                    <span class="lever"></span>
+                                    
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            </div>
+
+            <div class="row">
+                <div class="-field col s12">
+                
+                <i class="material-icons prefix">warning</i>
+                <input  value="Los cambios seran aplicados al Guardar" type="text" disabled="true">
+                
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="modal-footer">
+                <a href="#!" class="modal-close waves-effect waves-red btn-flat">Salir</a>
+                <a href="#!" class="modal-close waves-effect btn waves-blue btn-flat">Guardar</a>
+            </div>
+        </div>
+        </div>
+        `
+
+        return modal
+    }
+
+    private getHtmlTypeSelectedOnOff() {
+        return `
+                <option value="false" selected>Encendido - Apagado</option>
+                <option value="false">Encendido - Apagado</option>
+                <option value="true">Regulable</option>
+                `
+    }
+
+    private getHtmlTypeSelectedVariable() {
+        return `
+                <option value="true" selected>Regulable</option>
+                <option value="true">Regulable</option>
+                <option value="false">Encendido - Apagado</option>
+                `
+    }
+
+    private getHtmlStateOn(id) {
+        return `
+            <input type="checkbox" id="checkbox_state_${id}" checked="checked">
+            `;
+    }
+    private getHtmlStateOff(id) {
+        return `
+            <input type="checkbox" id="checkbox_state_${id}">`  
     }
 }
 
 window.addEventListener("load", ()=>{   
     initMaterialize();
-   
-    addListener(ElementId.button_add, EventName.click);
-    addListener(ElementId.button_show, EventName.click);
-    addListener(ElementId.button_reset, EventName.click);
-    addListener(ElementId.button_hide, EventName.click);
-
-    addListener(ElementId.button_list, EventName.click);
-
-    addListener(ElementId.input_apellido, EventName.keypress );
-    addListener(ElementId.input_documento, EventName.keypress );
-    addListener(ElementId.input_nombre, EventName.keypress );
-
-    addListener(ElementId.range_field, EventName.change );
-
-    endMaterialize();
+    initCombosMaterialize();
+  
+    addListener(ElementId.button_save, EventName.click);
+    addListener(ElementId.button_delete, EventName.click);
+    
+    addListener(ElementId.input_type, EventName.change );
+    addListener(ElementId.input_state, EventName.change );
+    addListener(ElementId.checkbox_state, EventName.change );
+    
+    addListener(ElementId.input_name, EventName.keypress );
+    addListener(ElementId.input_description, EventName.keypress );
+ 
+    showToast(Main.TOAST_PAGE_LOADED);
 });
 
+function initCombosMaterialize() {
+    var elems = document.getElementById(ElementId.modal_create);
+    M.Modal.init(elems, {
+        "outDuration": 500,
+        "endingTop": "10%"
+    });
+
+    var elems = document.getElementById(ElementId.modal_delete);
+    M.Modal.init(elems, {
+        "outDuration": 500,
+        "endingTop": "10%"
+    });
+
+    var elemsC = document.querySelectorAll('combo');
+    M.FormSelect.init(elemsC, {});
+
+    var elems = document.getElementById(ElementId.modal_help);
+    M.Modal.init(elems, {
+        "outDuration": 500,
+        "endingTop": "10%"
+    });
+}
 
 function initMaterialize() {
     M.updateTextFields();
 }
 
-function endMaterialize() {
-    M.toast({html: 'Pagina Lista!'})
+function showToast(text) {
+    M.toast({html: text,displayLength:1000})
 }
 
 /**

@@ -3,7 +3,6 @@ var PORT    = 3000;
 
 var express = require('express');
 var app     = express();
-var dataAccess = require('./database-access');
 var connection = require('./mysql-connector');
 
 // to parse application/json
@@ -12,6 +11,7 @@ app.use(express.json());
 app.use(express.static('/home/node/app/static/'));
 
 //=======[ Main module code ]==================================================
+
 /**
  * Obtener Dispositivos desde base de datos
  */
@@ -27,7 +27,6 @@ app.get('/devices/', function(req, res, next) {
         } else {
             responseAsJson = result;
         }
-
         res.send((JSON.stringify(responseAsJson))).status(200);
     });    
 });
@@ -182,7 +181,4 @@ app.delete('/test/device/:id', function(req, res) {
 app.listen(PORT, function(req, res) {
     console.log("NodeJS API running correctly");
 });
-
-
-
 //=======[ End of file ]=======================================================

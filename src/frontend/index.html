@@ -19,71 +19,117 @@
                 <div class="nav-wrapper">
                     <a href="#!" class="brand-logo left" style="margin-left: 15px;">Smart Home</a>
                     <ul id="nav-mobile" class="right" style="margin-right: 15px;">
-                        <li><a href="#">Help</a></li>
+                        <li><a class="waves-effect waves-light modal-trigger" href="#modal_help">Ayuda</a></li>
                     </ul>
                 </div>
             </nav>	
             <!-- Page Body -->
             <div class="container">
+                <h4>Smart Home Web Client!</h4>
                 <br/>
-                <h3>Smart Home Web Client!</h3>
-                <br/>
+                
+                <div class="col s3 m3 l3 xl3 center">
+                    <a href="#modal_create" class="btn waves-effect waves-effect waves-light modal-trigger">Crear</a>  
+                </div>
+
                 <div class="row">
-                     
-                    <div id="div_device_list"></div>
                     
+                <div id="div_device_list"></div>
 
+                <!-- Create Modal Structure -->
+                <div id="modal_create" class="modal">
+                    <div class="modal-content">
+                    <h4>Nuevo dispostivo:</h4>
+                    <div class="row">
 
-                    <div class="input-field col s4">
-                        <i class="material-icons prefix">account_circle</i>
-                        <input  value="" id="input_nombre" type="text" class="validate">
-                        <label  class="active" for="input_nombre" >Name</label>
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">input</i>
+                        <input  value="" id="input_name" type="text" class="validate">
+                        <label  class="active" for="input_name" >Nombre</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">input</i>
+                        <input  value="" id="input_description" type="text" class="validate">
+                        <label  class="active" for="input_description" >Descripcion</label>
+                    </div>
+
+                    <div class="input-field col s6">
+                        <i class="material-icons prefix">settings</i>
+                        <select  id="input_type">
+                            <option value="false">Encendido - Apagado</option>
+                            <option value="true">Regulable</option>
+                        </select>
+                        <label>Tipo</label>
+                    </div>
+
+                    <div class="input-field col s1">
+                        <i class="material-icons prefix">power</i>
+                    </div>
+                
+                    <div class="input-field col s5">
+                    <div class="switch">
+                        <div>
+                            <div>
+                                <label id="label_state">Apagado</label>
+                                <div>
+                                    <label>
+                                        <input type="checkbox" id="checkbox_state" >
+                                        <span class="lever"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                       </div>
-
-                    <div class="input-field col s4">
-                        <i class="material-icons prefix">account_circle</i>
-                        <input id="input_apellido"  type="text" class="materialize-input">   
-                        <label for="input_apellido">Apellido</label>
-                    </div>
-                    <div class="input-field col s4">
-                        <i class="material-icons prefix">account_circle</i>
-                        <input id="input_documento"  type="number" class="materialize-input"  >   
-                        <label for="input_documento">Documento</label>
-                    </div>
-                    
-                    <div class="input-field col s12">
-                        <i class="material-icons prefix">mail</i>
-                        <input id="email" type="email" class="validate">
-                        <label for="email">Email</label>
-                    </div>
-                    <div class="col s9 ml9 l9 xl9">
-                        <p class="range-field">
-                            <input type="range" id="range_field" min="0" max="100" />
-                        </p>
-                    </div>
-
-                    <div class="input-field col s3">
-                        <i class="material-icons prefix">number</i>
-                        <input  value="50" id="label_slider" type="number" readonly>
-                        <label  for="label_slider">Valor</label>
-                    </div>
-                    
-                    <div class="col s3 m3 l3 xl3 center">
-                        <button class="btn waves-effect waves-light button-view" id="button_add">AGREGAR</button>
                     </div> 
-                     <div class="col s3 m3 l3 xl3 center">
-                        <button class="btn waves-effect waves-light button-view" id="button_show">MOSTRAR</button>
+
+
                     </div>
-                    <div class="col s3 m3 l3 xl3 center">
-                        <button class="btn waves-effect waves-light button-view" id="button_hide">OCULTAR</button>
-                    </div>
-                    <div class="col s3 m3 l3 xl3 center">
-                        <button class="btn waves-effect waves-light button-view" id="button_reset">REINICAR</button>
+                    <div class="modal-footer">
+                    <a href="#!" class="modal-close waves-effect waves-red btn-flat">Salir</a>
+                    <button class="btn waves-effect waves-light button-view" id="button_save">GUARDAR</button>  
                     </div>
 
-                    <div class="col s3 m3 l3 xl3 center">
-                        <button class="btn waves-effect waves-light button-view" id="button_list">LISTAR</button>
                     </div>
+                </div>
+            
+                <!-- Delete Modal Structure -->
+                <div id="modal_delete" class="modal">
+                    <div class="modal-content">
+                    <h4>Eliminar Dispositivo:</h4>
+                    <div class="row">
+                        <i class="material-icons">pan_tool</i>
+                        <p>Esta a punto de eliminar un dispositivo de forma permanente ¿Desea continuar?<br>
+                        Haga clik en BORRAR para confirmar</p>
+                    </div>
+                    <div class="modal-footer">
+                    <a href="#!" class="modal-close waves-effect waves-red btn-flat">Salir</a>
+                    <button class="btn waves-effect waves-light button-view" id="button_delete">BORRAR</button>  
+                    </div>
+
+                    </div>
+                </div>
+
+                <!-- Modal HELP Structure -->
+                <div id="modal_help" class="modal">
+                    <div class="modal-content">
+                    <h4>Ayuda</h4> 
+                    <ul>
+                        <li>Cada dispositivo se lista automaticamente</li>
+                        <li>Con el boton "CREAR" se puede agregar un nuevo dispositivo</li>
+                        <li>- Al crear un dispositivo se recarga la lista</li>
+                        <li>Al hacer clik sobre cada dispositivo listado se puede:</li>
+                        <li>- Apagar / encender</li>
+                        <li>- Editar</li>
+                        <li>- Eliminar</li> 
+                        <li>- - Se pueden eliminar, pero confirmando la accion</li>
+                        <li>- - Al eliminar un dispositivo, se recarga la lista</li>
+                        
+                    </ul>
+                    </div>
+                    <div class="modal-footer">
+                    <a href="#!" class="modal-close waves-effect waves-green btn btn-flat">Cerrar</a>
+                    </div>
+                </div>
                     
                 </div>
             </div>	
