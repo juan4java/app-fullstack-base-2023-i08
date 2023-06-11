@@ -11,11 +11,8 @@ enum ElementId {
     input_state = "input_state",
 
     button_cancel = "button_cancel",
-    button_save = "button_save",
+    button_create_save = "button_save",
     button_delete = "button_delete",
-
-    range_field = "range_field",
-    label_slider = "label_slider",
 
     div_device_list = "div_device_list",
 
@@ -33,8 +30,7 @@ enum ElementId {
 enum EventName {
     keypress = "keypress",
     click = "click",
-    change = "change",
-    onmouseover = "onmouseover"
+    change = "change"
 }
 
 /**
@@ -42,8 +38,6 @@ enum EventName {
  */
 class Main implements EventListenerObject, HttpCallback{
     private service:services = new services
-    private static total:number = 0
-    private deviceArray:Device[]
     static main:Main
     private static deviceIdToDelete:number = -1
 
@@ -68,41 +62,23 @@ class Main implements EventListenerObject, HttpCallback{
     private constructor(){
         console.log(`Mi constructor main`)
         //Cargo los devices
-        this.getDevices()
+        this.refreshDeviceList()
     }
       
     /**
-     * Manejador de eventos
+     * Manejador de eventos 
      * @param event 
      */
     handleEvent(event){
         console.log(`evento ${event.target.id}`)
 
         switch(event.target.id){
-            case ElementId.range_field:
-                this.updateRangeValueInLabel(event.target.id, ElementId.label_slider);
-                break
-
             case ElementId.button_delete:
                 this.handleButtonConfirmDelete();
                 break
                         
-            case ElementId.button_save:
-                var d = this.getNewDeviceModal();
-                console.log(d)
-                
-                if(d.name && d.description && (d.type == 0 || d.type == 1)){
-                    var device:Device = new Device(-1,d.name,d.description,d.type==0, d.state)
-                    this.service.createDevice(this, device)
-                    var elem = document.getElementById(ElementId.modal_create);
-                    var instance = M.Modal.getInstance(elem);
-                    instance.close()
-                    this.resetNewDeviceModal()
-                    this.refreshDeviceList()
-                    
-                } else {
-                    showToast(Main.TOAST_DEVICE_CREATE_FIELD_REQUIRED);
-                }
+            case ElementId.button_create_save:
+                this.handleButtonCreateSave(event.target.id)
                 break
 
             case ElementId.checkbox_state:
@@ -110,23 +86,72 @@ class Main implements EventListenerObject, HttpCallback{
                 break
                 
             default:    
+                //Manejo eventos del listado
                 if(event.target.id.startsWith("href_status_")){
-                    this.handleDeviceOnOff(event.target.id);
+                    this.handleDeviceStatusOnOff(event.target.id);
+
                 } else if(event.target.id.startsWith("href_delete_")){
                     this.handleDeleteIconClick(event.target.id);
+
+                } else if(event.target.id.startsWith("href_update_")){
+                    this.handleUpdateDevice(event.target.id);
+
                 } else if(event.target.id.startsWith("checkbox_state_")){
-                    var id = this.getTargetIdNumber(event.target.id)
+                    var id = this.getDeviceIdFromEventName(event.target.id)
                     this.handleDeviceChangeState(event.target.id, `label_state_${id}`, false);
                 }              
         }
     }
 
     /**
+     * Maneja cuando se hace guardar y crear un nuevo dispositivo
+     * @param id 
+     */
+    private handleButtonCreateSave(id: string) {
+        var d = this.getDeviceFromModal();
+        console.log(d)
+        
+        if(d.name && d.description && (d.type == 0 || d.type == 1)){
+            //Creo un device y llamo al servicio
+            var device:Device = new Device(-1,d.name,d.description,d.type==0, d.state)
+            this.service.createDevice(this, device)
+
+            //Cierro el modal
+            this.closeModal(ElementId.modal_create);
+
+            //Limpio la informacion del modal
+            this.updateDeviceModal()
+        } else {
+            showToast(Main.TOAST_DEVICE_CREATE_FIELD_REQUIRED);
+        }
+    }
+
+    /**
+     * 
+     * @param modalName Cierra un modal por nombre
+     */
+    private closeModal(modalName:string) {
+        var elem = document.getElementById(modalName);
+        var instance = M.Modal.getInstance(elem);
+        instance.close();
+    }
+
+    private handleUpdateDevice(targetId: string ) {
+        var deviceId = this.getDeviceIdFromEventName(targetId)
+        var d = this.getDeviceFromModal(deviceId);
+        console.log(d)
+        var device:Device = new Device(deviceId, d.name,d.description,d.type==0, d.state)
+        this.service.updateDevice(this,device)
+        // // this.refreshDeviceList()        
+    }
+
+    /**
      * Maneja el click de eliminar un dispositivo
      */
     private handleDeleteIconClick(targetId:string) {
-        var deviceId = this.getTargetIdNumber(targetId)
+        var deviceId = this.getDeviceIdFromEventName(targetId)
         Main.deviceIdToDelete = deviceId
+
         var modal = document.getElementById(ElementId.modal_delete);
         var instance = M.Modal.getInstance(modal);
         instance.open();
@@ -136,25 +161,22 @@ class Main implements EventListenerObject, HttpCallback{
      * Maneja el evento de apagado encendido, actualizacion de icono  y texto
      * @param targetId 
      */
-    private handleDeviceOnOff(targetId: string) {
+    private handleDeviceStatusOnOff(targetId: string) {
+
+        var deviceId = this.getDeviceIdFromEventName(targetId)
+        
         var icon = document.getElementById(targetId);
-        if (icon.innerHTML.includes("flash_off")) {
-            var valueOn = `<i class="material-icons">flash_on</i>Apagar`;
-            icon.innerHTML = valueOn;
-            showToast(Main.TOAST_DEVICE_ON);
-        } else {
-            var valueOn = `<i class="material-icons">flash_off</i>Encender`;
-            icon.innerHTML = valueOn;
-            showToast(Main.TOAST_DEVICE_OFF);
-        }
+        var state = icon.innerHTML.includes("flash_off")
+        
+        this.service.updateDeviceStatus(this, deviceId, state)
     }
 
     /**
-     * Recupero el id del nombre del evento.
+     * Recupero el id a partir del nombre del evento.
      * @param eventId 
      * @returns 
      */
-    private getTargetIdNumber(eventId:string){
+    private getDeviceIdFromEventName(eventId:string){
         var elements:string[] = eventId.split("_")
         var id = parseInt(elements[elements.length-1])
         return id
@@ -182,111 +204,190 @@ class Main implements EventListenerObject, HttpCallback{
      * Manejador de evento para el boton borrar
      */
     private handleButtonConfirmDelete() {
-        var modal = document.getElementById(ElementId.modal_delete);
-        var instance = M.Modal.getInstance(modal);
-        instance.close()
+
+        this.closeModal(ElementId.modal_delete)
+
         this.service.deleteDevice(this, Main.deviceIdToDelete)
-        this.refreshDeviceList()
-    }
-
-    private refreshDeviceList(){
-        this.showProgressBar()
-        this.getDevices()
-    }
-
-
-
-
-    /**
-     * Cargo en lugar de la lista de dispositivos, un progress bar 
-     */
-    private showProgressBar() {
-        var deviceListDiv: HTMLElement = document.getElementById(ElementId.div_device_list)
-        deviceListDiv.innerHTML =  `<div class="progress">
-                                        <div class="indeterminate"></div>
-                                    </div>`
     }
 
     /**
-     * Recupera un dispositivo del modal crear
-     * @returns 
+     * Manejador de respuestas del backend
+     * @param response 
+     * @param operation 
      */
-    private getNewDeviceModal(){
-        var name = <HTMLInputElement> document.getElementById(ElementId.input_name);
-        var description = <HTMLInputElement> document.getElementById(ElementId.input_description);
-        var type = <HTMLSelectElement> document.getElementById(ElementId.input_type);
-        var state = <HTMLInputElement> document.getElementById(ElementId.checkbox_state);
-       
-        return {"name":name.value,
-                "description":description.value,
-                "type": type.selectedIndex,
-                "state":state.checked,
-            }
-    }
-
-    /**
-     * Limpia los datos que esten previamente cargados en el modal de creacion
-     */
-    private resetNewDeviceModal(){
-        var name = <HTMLInputElement> document.getElementById(ElementId.input_name);
-        var description = <HTMLInputElement> document.getElementById(ElementId.input_description);
-        var type = <HTMLSelectElement> document.getElementById(ElementId.input_type);
-        var state = <HTMLInputElement> document.getElementById(ElementId.checkbox_state);
-       
-        name.value = ""
-        description.value = ""
-        type.selectedIndex = 0
-        state.checked = false
-
-        this.handleDeviceChangeState(ElementId.checkbox_state, ElementId.label_state, true)
-    }
-
-    /**
-     * Permite mantener un label asociado al slicer indicado, de
-     * forma que al cambiar el slicer, se vea el valor en el label
-     * @param elementId 
-     * @param elementLabel 
-     */
-    private updateRangeValueInLabel(elementId:ElementId,elementLabel:ElementId ) {
-        var range = <HTMLInputElement> document.getElementById(elementId);
-        var label = <HTMLInputElement> document.getElementById(elementLabel);
-        label.value = range.value;
-    }
-
-    /**
-     * Recupero mediante AJAX datos al BackEnd y lo informo por consola.
-     */
-    private getDevices(){
-        this.service.getDevices(this)
-    }
-
-
     public handleServiceResponse(response: string, operation?:string) {
         
         switch(operation){
-            case SERVICE_CALLBACK.GET_DEVICES:
-                this.handleServiceResponseGet(response)
+            case SERVICE_CALLBACK.GET_DEVICE_LIST:
+                this.handleServiceResponseGetDevices(response)
                 break
             case SERVICE_CALLBACK.DELETE_DEVICE:
                 this.handleServiceResponseDelete(response)
                 break
             case SERVICE_CALLBACK.CREATE_DEVICE:
-                this.handleServiceCreate(response)
+                this.handleServiceResponseCreate(response)
+                break
+            case SERVICE_CALLBACK.UPDATE_DEVICE:
+                this.handleServiceResponseUpdate(response)
+                break
+            case SERVICE_CALLBACK.UPDATE_DEVICE_STATE:
+                this.handleServiceResponseUpdateState(response)
                 break
             default:
-                showToast(response)
+                var json = JSON.parse(response)
+                showToast(json.message)
                 break
+        }
+    }
 
+    /**
+     * Recupera un dispositivo del modal
+     * Si no se pasa id el modal es el del alta
+     * Si se pasa el id, se recupera ese dispositivo mediante una variable concatenada
+     * @returns 
+     */  
+    private getDeviceFromModal(deviceId?: number) {
+
+        var postName = ""
+        if(deviceId >= 0){
+            postName = "_"+deviceId
         }
 
+        var name = <HTMLInputElement> document.getElementById(ElementId.input_name+postName);
+        var description = <HTMLInputElement> document.getElementById(ElementId.input_description+postName);
+        var type = <HTMLSelectElement> document.getElementById(ElementId.input_type+postName);
+        var state = <HTMLInputElement> document.getElementById(ElementId.checkbox_state+postName);
+       
+        return {"name":name.value,
+                "description":description.value,
+                "type": type.selectedIndex,
+                "state":state.checked,
+            }    
     }
-    
+
+    /**
+     * 
+     * @param device 
+     */
+    private updateDeviceModal(device?:Device){
+
+        var postName = ""
+        var isDeviceInList = false
+        if(device){
+            isDeviceInList = device.id >= 0
+            if(isDeviceInList) {
+                postName = "_"+device.id    
+            }
+        }
+
+        var name = <HTMLInputElement> document.getElementById(ElementId.input_name+postName);
+        var description = <HTMLInputElement> document.getElementById(ElementId.input_description+postName);
+        var type = <HTMLSelectElement> document.getElementById(ElementId.input_type+postName);
+        var state = <HTMLInputElement> document.getElementById(ElementId.checkbox_state+postName);
+           
+       
+        console.log(device)
+        if(isDeviceInList) {
+
+            //Actualizo los datos que se muestran en la lista
+            this.updateHeaderDevice(device.id, device.state);
+
+            var nameId:string = "header_list_"+device.id
+            console.log(nameId)
+            document.getElementById(nameId).innerHTML = device.id+"-"+device.name+"-"+device.description
+
+            //Actualizo los valores que se ven al hacer click en el boton Editar
+            name.value = device.name
+            description.value = device.description
+            type.selectedIndex = device.type ? 1:0
+            state.checked = device.state
+        } else {           
+            //Se limpian los valores, es el modal de creacion
+            name.value = ""
+            description.value = ""
+            type.selectedIndex = 0
+            state.checked = false
+        }
+
+        this.handleDeviceChangeState(ElementId.checkbox_state, ElementId.label_state, true)
+    }
+
+    /**
+     * Actualiza datos e iconos del header para el dispositivo
+     * @param id 
+     * @param state 
+     */
+    private updateHeaderDevice(id: number, state: boolean) {
+        
+        var el: string = "message_icon_" + id;
+        document.getElementById(el).innerHTML = state ? "Encendido" : "Apagado";
+
+        el = "bar_icon_state_" + id;
+        var el1 = document.getElementById(el)
+
+        el1.innerHTML = state ? "check" : "close";
+        
+        var icon = document.getElementById("href_status_"+id);
+        var state = icon.innerHTML.includes("flash_off")
+
+        if (icon.innerHTML.includes("flash_off")) {
+            var valueOn = `<i class="material-icons">flash_on</i>Apagar`;
+            icon.innerHTML = valueOn;
+            showToast(Main.TOAST_DEVICE_ON);
+        } else {
+            var valueOn = `<i class="material-icons">flash_off</i>Encender`;
+            icon.innerHTML = valueOn;
+            showToast(Main.TOAST_DEVICE_OFF);
+        }
+    }
+
+    /**
+     * Recupero datos del BackEnd.
+     */
+    private getDeviceList(){
+        this.service.getDeviceList(this)
+    }
+
+    private refreshDeviceList(){
+        var deviceListDiv: HTMLElement = document.getElementById(ElementId.div_device_list)
+        deviceListDiv.innerHTML =  `<div class="progress">
+                                        <div class="indeterminate"></div>
+                                    </div>`
+        
+        this.getDeviceList()
+    }
+
     /**
      * Maneja la respuesta de una creacion exitosa de dispositivo
      * @param response 
      */
-    private handleServiceCreate(response: string) {
+    private handleServiceResponseCreate(response: string) {
+        //Recupero toda la lista
+        this.getDeviceList()
+        //Informo que el equipo se creo
         showToast(Main.TOAST_DEVICE_CREATED)
+    }
+
+    /**
+     * Maneja la respuesta de una actualizacion exitosa de dispositivo
+     * @param response 
+     */
+    private handleServiceResponseUpdate(response: string) {
+        var device:Device = JSON.parse(response)
+        console.log(device)
+        this.updateDeviceModal(device)
+        showToast(Main.TOAST_DEVICE_UPDATED)
+    }
+    
+    /**
+     * Maneja la respuesta de una actualizacion exitosa de dispositivo
+     * @param response 
+     */
+    private handleServiceResponseUpdateState(response: string) {
+        
+        var device = JSON.parse(response)
+        this.updateHeaderDevice(device.id, device.state)
+        showToast(device.message)
     }
 
     /**
@@ -294,36 +395,36 @@ class Main implements EventListenerObject, HttpCallback{
      * @param response
      */
     public handleServiceResponseDelete(response: string) {
-        showToast(Main.TOAST_DEVICE_DELETED);
-     }
         
-
+        var resp = JSON.parse(response)
+        document.getElementById("li_"+resp.id).innerHTML = ""
+    
+        showToast(resp.message);
+     }
 
     /**
      * Manejador de respuestas a datos provenientes de backend
      * @param response
      */
-    public handleServiceResponseGet(response: string) {
+    public handleServiceResponseGetDevices(response: string) {
         var array = JSON.parse(response)
-        this.deviceArray = array
         var deviceListDiv: HTMLElement = document.getElementById(ElementId.div_device_list)
         
         var deviceList = ""
         array.forEach((e) => {
-            var leftIcon = `cloud_done`
             var estado:boolean = e.state == 0;
             var stateOnOff
             var stateMessage
             var messageIcon
-            var barIcon
+            var barIconState
 
             if(estado){
-                barIcon =`close`
+                barIconState =`close`
                 stateOnOff =`flash_off`
                 messageIcon =`Apagado`
                 stateMessage =`Encender`
             } else {
-                barIcon =`check`
+                barIconState =`check`
                 stateOnOff =`flash_on`
                 messageIcon =`Encendido`
                 stateMessage =`Apagar`
@@ -336,10 +437,10 @@ class Main implements EventListenerObject, HttpCallback{
             // }
 
             deviceList =    `${deviceList}
-                            <li>
+                            <li id="li_${e.id}">
                                 <div class="collapsible-header">
-                                    <i class="material-icons ">chevron_right</i><span class="title">${e.id}-${e.name}-${e.description}</span>
-                                    <span class="badge">${messageIcon}</span><i class="material-icons ">${barIcon}</i>
+                                    <i class="material-icons">chevron_right</i><span class="title" id="header_list_${e.id}">${e.id}-${e.name}-${e.description}</span>
+                                    <span class="badge" id="message_icon_${e.id}">${messageIcon}</span><i class="material-icons" id="bar_icon_state_${e.id}">${barIconState}</i>
                                 </div>
 
                                 <div class="collapsible-body"> 
@@ -349,7 +450,7 @@ class Main implements EventListenerObject, HttpCallback{
                                             <span class="title">${e.description}</span>
                                             <br>
                                             
-                                            <a href="#!" class="content" id="href_status_${e.id}"><i class="material-icons">${stateOnOff}</i>${stateMessage}</a>
+                                            <a href="#!" class="content" id="href_status_${e.id}"><i class="material-icons" id="state_icon_${e.id}">${stateOnOff}</i>${stateMessage}</a>
 
                                             <a href="#!" class="secondary-content"><i class="material-icons" id="href_delete_${e.id}">delete</i></a>
                                             <a href="#modal_edit_${e.id}" class="waves-effect waves-light modal-trigger">Editar</a>
@@ -366,7 +467,7 @@ class Main implements EventListenerObject, HttpCallback{
         deviceListDiv.innerHTML = `<ul class="collapsible">
                                         ${deviceList}
                                     </ul>`;
-
+       
         //Agregp listener para los elementos que requieren una accion de la lista de dispositivos
         array.forEach(e => {
             var elems = document.getElementById(`modal_edit_${e.id}`);
@@ -380,6 +481,9 @@ class Main implements EventListenerObject, HttpCallback{
             var iconE: HTMLElement = document.getElementById(`href_delete_${e.id}`)
             iconE.addEventListener(EventName.click, Main.getInstance())
 
+            var iconE: HTMLElement = document.getElementById(`href_update_${e.id}`)
+            iconE.addEventListener(EventName.click, Main.getInstance())
+
             var iconE: HTMLElement = document.getElementById(`checkbox_state_${e.id}`)
             iconE.addEventListener(EventName.click, Main.getInstance())
         });
@@ -391,10 +495,9 @@ class Main implements EventListenerObject, HttpCallback{
         elems.forEach(e => {
             var instances = M.Collapsible.init(e, {
                 accordion: true
-              });
+                });
         });
     }
-
 
     /**
      * Aca armo el modal para la edicion de un dispositivo.
@@ -422,7 +525,7 @@ class Main implements EventListenerObject, HttpCallback{
                 <label  class="active" for="input_name" >Nombre</label>
             </div>
 
-            <!-- Campo Description-->s
+            <!-- Campo Description-->
             <div class="input-field col s6">
                 <i class="material-icons prefix">input</i>
                 <input  value="${e.description}" id="input_description_${e.id}" type="text" class="validate">
@@ -432,12 +535,12 @@ class Main implements EventListenerObject, HttpCallback{
             <!-- Campo Type-->
             <div class="input-field col s6">
                 <i class="material-icons prefix">settings</i>
-                <select  id="input_type_${e.id}>
+                <select id="input_type_${e.id}">
                 `
                 if(type){
-                    modal = modal + this.getHtmlTypeSelectedVariable()
+                    modal = modal + this.getHtmlDeviceTypeSelectedVariable()
                 } else {
-                    modal = modal + this.getHtmlTypeSelectedOnOff()
+                    modal = modal + this.getHtmlDeviceTypeSelectedOnOff()
                 }
                 modal = modal + `
                 </select>
@@ -459,9 +562,9 @@ class Main implements EventListenerObject, HttpCallback{
                                     
                                     `
                                     if( e.state == true){
-                                        modal = modal + this.getHtmlStateOn(e.id)
+                                        modal = modal + this.getHtmlDeviceStateOn(e.id)
                                     } else {
-                                        modal = modal + this.getHtmlStateOff(e.id)
+                                        modal = modal + this.getHtmlDeviceStateOff(e.id)
                                     }
                                     modal = modal + `
                                     <span class="lever"></span>
@@ -486,7 +589,7 @@ class Main implements EventListenerObject, HttpCallback{
             <!-- Buttons -->
             <div class="modal-footer">
                 <a href="#!" class="modal-close waves-effect waves-red btn-flat">Salir</a>
-                <a href="#!" class="modal-close waves-effect btn waves-blue btn-flat">Guardar</a>
+                <a href="#!" class="modal-close waves-effect btn waves-blue btn-flat" id="href_update_${e.id}">ACTUALIZAR</a>
             </div>
         </div>
         </div>
@@ -495,28 +598,26 @@ class Main implements EventListenerObject, HttpCallback{
         return modal
     }
 
-    private getHtmlTypeSelectedOnOff() {
+    private getHtmlDeviceTypeSelectedOnOff() {
         return `
                 <option value="false" selected>Encendido - Apagado</option>
-                <option value="false">Encendido - Apagado</option>
                 <option value="true">Regulable</option>
                 `
     }
 
-    private getHtmlTypeSelectedVariable() {
+    private getHtmlDeviceTypeSelectedVariable() {
         return `
                 <option value="true" selected>Regulable</option>
-                <option value="true">Regulable</option>
                 <option value="false">Encendido - Apagado</option>
                 `
     }
 
-    private getHtmlStateOn(id) {
+    private getHtmlDeviceStateOn(id) {
         return `
             <input type="checkbox" id="checkbox_state_${id}" checked="checked">
             `;
     }
-    private getHtmlStateOff(id) {
+    private getHtmlDeviceStateOff(id) {
         return `
             <input type="checkbox" id="checkbox_state_${id}">`  
     }
@@ -526,7 +627,7 @@ window.addEventListener("load", ()=>{
     initMaterialize();
     initCombosMaterialize();
   
-    addListener(ElementId.button_save, EventName.click);
+    addListener(ElementId.button_create_save, EventName.click);
     addListener(ElementId.button_delete, EventName.click);
     
     addListener(ElementId.input_type, EventName.change );

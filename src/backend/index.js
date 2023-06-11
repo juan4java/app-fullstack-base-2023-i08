@@ -23,11 +23,13 @@ app.get('/devices/', function(req, res, next) {
       
         if (err) {
             console.error('Error while connect to DB: ' + err.stack);
-            responseAsJson = JSON.parse(`{"error":"FALLO"}`)
+            responseAsJson = JSON.parse(`{"message":"FALLO"}`)
+            res.status(404)
         } else {
             responseAsJson = result;
+            res.status(200)
         }
-        res.send((JSON.stringify(responseAsJson))).status(200);
+        res.send((JSON.stringify(responseAsJson)));
     });    
 });
 
@@ -48,16 +50,49 @@ app.post('/device/:id', function(req, res) {
        
         if (err) {
             console.error('Error while connect to DB: ' + err.stack);
-            responseAsJson = JSON.parse(`{"error":"FALLO"}`)
+            responseAsJson = JSON.parse(`{"message":"FALLO"}`)
         } else {
             if(result.affectedRows == 0){
-                responseAsJson = JSON.parse(`{"warning":"No se actualizo ningun dispositivo"}`)
+                responseAsJson = JSON.parse(`{"message":"No se actualizo ningun dispositivo"}`)
+                res.status(404)
             } else {
                 var response = `{"id":${req.params.id},"name":"${req.body.name}","description":"${req.body.description}","state":${req.body.state},"type":${req.body.type}}`
                 responseAsJson = JSON.parse(response)
+                res.status(200)
             }
         }
-        res.send((JSON.stringify(responseAsJson))).status(200);
+        res.send((JSON.stringify(responseAsJson)));
+    });
+});
+
+/**
+ * Update dispositivo
+ * retorna el dispositivo con los cambios
+ * si falla, retorna un error
+ */
+app.post('/device/:id/state', function(req, res) {
+    
+  
+    var state = req.body.state ? 1:0
+
+    var sql = `UPDATE Devices SET state='${state}' WHERE id='${req.params.id}'`;
+    connection.query(sql, function (err, result) {
+        var responseAsJson
+       
+        if (err) {
+            console.error('Error while connect to DB: ' + err.stack);
+            responseAsJson = JSON.parse(`{"message":"FALLO"}`)
+        } else {
+            if(result.affectedRows == 0){
+                responseAsJson = JSON.parse(`{"message":"No se actualizo ningun dispositivo"}`)
+                res.status(404)
+            } else {
+                var response = `{"message":"Dispositivo cambio de estado", "id":${req.params.id},"state":${req.body.state}}`
+                responseAsJson = JSON.parse(response)
+                res.status(200)
+            }
+        }
+        res.send((JSON.stringify(responseAsJson)));
     });
 });
 
@@ -75,18 +110,20 @@ app.put('/device/', function(req, res) {
        
         if (err) {
             console.error('Error while connect to DB: ' + err.stack);
-            var responseAsJson = JSON.parse(`{"error":"FALLO"}`)
+            var responseAsJson = JSON.parse(`{"message":"FALLO"}`)
             res.send((JSON.stringify(responseAsJson))).status(200);
         } else {
             
             var responseAsJson
             if(result.affectedRows == 0){
-                responseAsJson = JSON.parse(`{"warning":"No creo el dispositivo"}`)
+                responseAsJson = JSON.parse(`{"message":"No creo el dispositivo"}`)
+                res.status(404)
             } else {
                 var response = `{"id":${result.insertId},"name":"${req.body.name}","description":"${req.body.description}","state":${req.body.state},"type":${req.body.type}}`
                 responseAsJson = JSON.parse(response)
+                res.status(200)
             }
-            res.send((JSON.stringify(responseAsJson))).status(200);
+            res.send((JSON.stringify(responseAsJson)));
         }
     });
 });
@@ -103,16 +140,19 @@ app.delete('/device/:id', function(req, res) {
         
         if (err) {
             console.error('Error while connect to DB: ' + err.stack);
-            responseAsJson = JSON.parse(`{"error":"FALLO"}`)
+            responseAsJson = JSON.parse(`{"message":"FALLO"}`)
+            res.status(503)
         } else {
 
             if(result.affectedRows == 0){
-                responseAsJson = JSON.parse(`{"warning":"No existe el dispositivo"}`)
+                responseAsJson = JSON.parse(`{"message":"No existe el dispositivo"}`)
+                res.status(404)
             } else {
-                responseAsJson = JSON.parse(`{"message":"Elementos borrados ${result.affectedRows} "}`)
+                responseAsJson = JSON.parse(`{"message":"Dispositivo eliminado, id:${req.params.id}", "id":${req.params.id}}`)
+                res.status(200)
             }
         }
-        res.send((JSON.stringify(responseAsJson))).status(200);
+        res.send((JSON.stringify(responseAsJson)));
     });
 });
 
