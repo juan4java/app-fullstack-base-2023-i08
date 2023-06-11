@@ -45,6 +45,7 @@ class Main implements EventListenerObject, HttpCallback{
     private static total:number = 0
     private deviceArray:device[]
     static main:Main
+    private static deviceIdToDelete:number = -1
 
     static TOAST_PAGE_LOADED:string = "Pagina cargada!"
     static TOAST_DEVICE_ON:string = "Se encendio el dispositivo"
@@ -84,7 +85,6 @@ class Main implements EventListenerObject, HttpCallback{
 
             case ElementId.button_delete:
                 this.handleButtonConfirmDelete();
-                showToast(Main.TOAST_DEVICE_DELETED);
                 break
                         
             case ElementId.button_save:
@@ -108,7 +108,7 @@ class Main implements EventListenerObject, HttpCallback{
                 if(event.target.id.startsWith("href_status_")){
                     this.handleDeviceOnOff(event.target.id);
                 } else if(event.target.id.startsWith("href_delete_")){
-                    this.handleDeleteIconClick();
+                    this.handleDeleteIconClick(event.target.id);
                 } else if(event.target.id.startsWith("checkbox_state_")){
                     var id = this.getTargetIdNumber(event.target.id)
                     this.handleDeviceChangeState(event.target.id, `label_state_${id}`, false);
@@ -119,7 +119,9 @@ class Main implements EventListenerObject, HttpCallback{
     /**
      * Maneja el click de eliminar un dispositivo
      */
-    private handleDeleteIconClick() {
+    private handleDeleteIconClick(targetId:string) {
+        var deviceId = this.getTargetIdNumber(targetId)
+        Main.deviceIdToDelete = deviceId
         var modal = document.getElementById(ElementId.modal_delete);
         var instance = M.Modal.getInstance(modal);
         instance.open();
@@ -149,7 +151,7 @@ class Main implements EventListenerObject, HttpCallback{
      */
     private getTargetIdNumber(eventId:string){
         var elements:string[] = eventId.split("_")
-        var id = elements[elements.length-1]
+        var id = parseInt(elements[elements.length-1])
         return id
     }
 
@@ -178,6 +180,7 @@ class Main implements EventListenerObject, HttpCallback{
         var modal = document.getElementById(ElementId.modal_delete);
         var instance = M.Modal.getInstance(modal);
         instance.close()
+        this.service.deleteDevice(this, Main.deviceIdToDelete)
         this.showProgressBar()
         this.getDevices()
     }
@@ -245,11 +248,42 @@ class Main implements EventListenerObject, HttpCallback{
         this.service.getDevices(this)
     }
 
+
+    public handleServiceResponse(response: string, operation:string) {
+        
+        switch(operation){
+            case SERVICE_CALLBACK.GET_DEVICES:
+                this.handleServiceResponseGet(response)
+                break
+            case SERVICE_CALLBACK.DELETE_DEVICE:
+                this.handleServiceResponseDelete(response)
+                break
+            case "ERROR":
+                showToast(response)
+                break
+
+        }
+
+    }
+
     /**
      * Manejador de respuestas a datos provenientes de backend
      * @param response
      */
-    public handleServiceResponse(response: string) {
+    public handleServiceResponseDelete(response: string) {
+        var array = JSON.parse(response)
+        console.log(array)
+//        showToast(array)
+        showToast(Main.TOAST_DEVICE_DELETED);
+     }
+        
+
+
+    /**
+     * Manejador de respuestas a datos provenientes de backend
+     * @param response
+     */
+    public handleServiceResponseGet(response: string) {
         var array = JSON.parse(response)
         this.deviceArray = array
         var deviceListDiv: HTMLElement = document.getElementById(ElementId.div_device_list)

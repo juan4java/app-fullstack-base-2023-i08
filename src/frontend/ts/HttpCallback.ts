@@ -1,3 +1,3 @@
 interface HttpCallback {
-    handleServiceResponse(response:string)
+    handleServiceResponse(response:string, operation:string)
 }
