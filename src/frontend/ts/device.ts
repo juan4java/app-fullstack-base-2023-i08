@@ -1,22 +1,24 @@
 enum typeEnum {
     ON_OFF = "Encendido - Apagado",
-    ON_DIAL_OFF = "Reguble - Apagado",
+    DIAL = "Reguble",
 }
 
-class device {
+class Device {
     
     public id:number
     public name:string
     public description:string
-    public state:number
     public type:boolean
+    public state:boolean
     
-    constructor(id?:number, nombre?:string, descripcion?:string, estado?:number, tipo?:boolean){
+    constructor(id?:number, nombre?:string, descripcion?:string, type?:boolean, status?:boolean){
+        this.id = id
+        this.name = nombre
+        this.description = descripcion
+        this.type = type
+        this.state = status 
     }
 
-    public isValid():boolean{
-        return false
-    }
 
     public toString(): string{
         return `id: ${this.id} ,

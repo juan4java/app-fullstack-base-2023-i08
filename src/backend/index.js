@@ -38,7 +38,11 @@ app.get('/devices/', function(req, res, next) {
  */
 app.post('/device/:id', function(req, res) {
     
-    var sql = `UPDATE Devices SET name='${req.body.name}',description='${req.body.description}',state='${req.body.state}',type='${req.body.type}' WHERE id='${req.params.id}'`;
+  
+    var state = req.body.state ? 1:0
+    var type = req.body.type ? 1:0
+
+    var sql = `UPDATE Devices SET name='${req.body.name}',description='${req.body.description}',state='${state}',type='${type}' WHERE id='${req.params.id}'`;
     connection.query(sql, function (err, result) {
         var responseAsJson
        
@@ -63,7 +67,10 @@ app.post('/device/:id', function(req, res) {
  */
 app.put('/device/', function(req, res) {
     
-    var sql = `INSERT INTO Devices (name,description,state,type) VALUES ('${req.body.name}','${req.body.description}','${req.body.state}','${req.body.type}')`;
+    var state = req.body.state ? 1:0
+    var type = req.body.type ? 1:0
+
+    var sql = `INSERT INTO Devices (name,description,state,type) VALUES ('${req.body.name}','${req.body.description}','${state}','${type}')`;
     connection.query(sql, function (err, result) {
        
         if (err) {

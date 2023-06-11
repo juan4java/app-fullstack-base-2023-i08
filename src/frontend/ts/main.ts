@@ -43,7 +43,7 @@ enum EventName {
 class Main implements EventListenerObject, HttpCallback{
     private service:services = new services
     private static total:number = 0
-    private deviceArray:device[]
+    private deviceArray:Device[]
     static main:Main
     private static deviceIdToDelete:number = -1
 
@@ -89,12 +89,17 @@ class Main implements EventListenerObject, HttpCallback{
                         
             case ElementId.button_save:
                 var d = this.getNewDeviceModal();
+                console.log(d)
                 
-                if(d.name && d.description && d.type > 0){
+                if(d.name && d.description && (d.type == 0 || d.type == 1)){
+                    var device:Device = new Device(-1,d.name,d.description,d.type==0, d.state)
+                    this.service.createDevice(this, device)
                     var elem = document.getElementById(ElementId.modal_create);
                     var instance = M.Modal.getInstance(elem);
                     instance.close()
                     this.resetNewDeviceModal()
+                    this.refreshDeviceList()
+                    
                 } else {
                     showToast(Main.TOAST_DEVICE_CREATE_FIELD_REQUIRED);
                 }
@@ -181,9 +186,16 @@ class Main implements EventListenerObject, HttpCallback{
         var instance = M.Modal.getInstance(modal);
         instance.close()
         this.service.deleteDevice(this, Main.deviceIdToDelete)
+        this.refreshDeviceList()
+    }
+
+    private refreshDeviceList(){
         this.showProgressBar()
         this.getDevices()
     }
+
+
+
 
     /**
      * Cargo en lugar de la lista de dispositivos, un progress bar 
@@ -208,7 +220,7 @@ class Main implements EventListenerObject, HttpCallback{
         return {"name":name.value,
                 "description":description.value,
                 "type": type.selectedIndex,
-                "state":state.checked
+                "state":state.checked,
             }
     }
 
@@ -249,7 +261,7 @@ class Main implements EventListenerObject, HttpCallback{
     }
 
 
-    public handleServiceResponse(response: string, operation:string) {
+    public handleServiceResponse(response: string, operation?:string) {
         
         switch(operation){
             case SERVICE_CALLBACK.GET_DEVICES:
@@ -258,12 +270,23 @@ class Main implements EventListenerObject, HttpCallback{
             case SERVICE_CALLBACK.DELETE_DEVICE:
                 this.handleServiceResponseDelete(response)
                 break
-            case "ERROR":
+            case SERVICE_CALLBACK.CREATE_DEVICE:
+                this.handleServiceCreate(response)
+                break
+            default:
                 showToast(response)
                 break
 
         }
 
+    }
+    
+    /**
+     * Maneja la respuesta de una creacion exitosa de dispositivo
+     * @param response 
+     */
+    private handleServiceCreate(response: string) {
+        showToast(Main.TOAST_DEVICE_CREATED)
     }
 
     /**
@@ -271,9 +294,6 @@ class Main implements EventListenerObject, HttpCallback{
      * @param response
      */
     public handleServiceResponseDelete(response: string) {
-        var array = JSON.parse(response)
-        console.log(array)
-//        showToast(array)
         showToast(Main.TOAST_DEVICE_DELETED);
      }
         
@@ -382,9 +402,9 @@ class Main implements EventListenerObject, HttpCallback{
      * @param name 
      * @returns 
      */
-    private getHtmlModalEdit(e:device) {
+    private getHtmlModalEdit(e:Device) {
         
-        var labelState = e.state == 1 ? "Encendido" :"Apagado"
+        var labelState = e.state == true ? "Encendido" :"Apagado"
         var type = e.type == true 
         var modal =
         `    
@@ -438,7 +458,7 @@ class Main implements EventListenerObject, HttpCallback{
                                 <label>
                                     
                                     `
-                                    if( e.state == 1){
+                                    if( e.state == true){
                                         modal = modal + this.getHtmlStateOn(e.id)
                                     } else {
                                         modal = modal + this.getHtmlStateOff(e.id)
