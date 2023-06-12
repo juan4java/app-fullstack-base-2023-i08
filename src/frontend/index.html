@@ -56,32 +56,58 @@
                     <div class="input-field col s6">
                         <i class="material-icons prefix">settings</i>
                         <select  id="input_type">
-                            <option value="false">Encendido - Apagado</option>
-                            <option value="true">Regulable</option>
+                            <option value="0">Encendido - Apagado</option>
+                            <option value="1">Regulable</option>
                         </select>
                         <label>Tipo</label>
                     </div>
 
-                    <div class="input-field col s1">
-                        <i class="material-icons prefix">power</i>
-                    </div>
-                
-                    <div class="input-field col s5">
-                    <div class="switch">
-                        <div>
-                            <div>
-                                <label id="label_state">Apagado</label>
+                    <div id="div_onoff" >
+
+                        <div class="input-field col s1">
+                            <i class="material-icons prefix">power</i>
+                        </div>
+                        
+                        <div class="input-field col s5">
+                            <div class="switch">
                                 <div>
-                                    <label>
-                                        <input type="checkbox" id="checkbox_state" >
-                                        <span class="lever"></span>
-                                    </label>
+                                    <div>
+                                        <label id="label_state">Apagado</label>
+                                        <div>
+                                            <label>
+                                                <input type="checkbox" id="checkbox_state" >
+                                                <span class="lever"></span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        </div> 
+                    </div>
+                        
+                    <div  id="div_dial" hidden="true">
+                        <div class="input-field col s1">
+                            <i class="material-icons prefix">power</i>
                         </div>
-                      </div>
-                    </div> 
-
+                        
+                        <div class="input-field col s3">
+                            <div class="switch">
+                                <div>
+                                    <div>
+                                        <label id="label_range">Intensidad 50%</label>
+                                        <p class="range-field">
+                                            <input type="range" id="range_field" min="0" max="100" />
+                                        </p>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="input-field col s2">
+                        </div>
+                    </div>
+                        
 
                     </div>
                     <div class="modal-footer">
@@ -113,18 +139,19 @@
                 <!-- Modal HELP Structure -->
                 <div id="modal_help" class="modal">
                     <div class="modal-content">
-                    <h4>Ayuda</h4> 
+                    <h4>Ayuda - Version 3.0.0</h4> 
                     <ul>
                         <li>Cada dispositivo se lista automaticamente</li>
                         <li>Con el boton "CREAR" se puede agregar un nuevo dispositivo</li>
                         <li>- Al crear un dispositivo se recarga la lista</li>
                         <li>Al hacer clik sobre cada dispositivo listado se puede:</li>
                         <li>- Apagar / encender</li>
+                        <li>-- Al encerder/apagar se actualiza el estado de los dispositivo</li>
                         <li>- Editar</li>
+                        <li>-- Al editar se actualizan los datos del dispostivo</li>
                         <li>- Eliminar</li> 
                         <li>- - Se pueden eliminar, pero confirmando la accion</li>
-                        <li>- - Al eliminar un dispositivo, se recarga la lista</li>
-                        
+                        <li>- - Al eliminar un dispositivo, este se quita de la lista si se confirma, o si no existia mas</li>
                     </ul>
                     </div>
                     <div class="modal-footer">
@@ -141,13 +168,12 @@
                 <div class="row">
                     <div class="col l6 s6">
                         <h5 class="white-text">Smart Home</h5>
-                        <p class="grey-text text-lighten-4">Copyright ### - 2021</p>
+                        <p class="grey-text text-lighten-4">2023</p>
                     </div>
                     <div class="col l6 s6">
                         <h5 class="white-text right-align">Contact</h5>
                         <p class="white-text right-align">
                             <a class="grey-text text-lighten-3" href="!#">Email | </a>
-                            <a class="grey-text text-lighten-3" href="!#">Twitter | </a>
                             <a class="grey-text text-lighten-3" href="!#">LinkedIn</a>
                         </p>
                     </div>

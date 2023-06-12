@@ -1,0 +1,648 @@
+{
+	"info": {
+		"_postman_id": "ea271b1d-19b3-49b5-a83d-9389a4f30823",
+		"name": "DAW",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "getDevices",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/devices",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"devices"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "getDevices",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/devices",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"devices"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "615"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"267-UiCO43Q75d666rAKHknDfurveo4\""
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 12 Jun 2023 05:24:57 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[{\"id\":1,\"name\":\"Lampara 1\",\"description\":\"Luz living\",\"state\":1,\"type\":1},{\"id\":2,\"name\":\"Lampara 2\",\"description\":\"Luz cocina\",\"state\":0,\"type\":0},{\"id\":3,\"name\":\"Velador\",\"description\":\"Velador living\",\"state\":1,\"type\":0},{\"id\":4,\"name\":\"Persiana 1\",\"description\":\"Persiana living\",\"state\":1,\"type\":1},{\"id\":5,\"name\":\"test\",\"description\":\"test\",\"state\":1,\"type\":1},{\"id\":6,\"name\":\"test\",\"description\":\"test\",\"state\":0,\"type\":1},{\"id\":14,\"name\":\"dad\",\"description\":\"adada\",\"state\":0,\"type\":0},{\"id\":15,\"name\":\"ddd\",\"description\":\"ddd\",\"state\":1,\"type\":1},{\"id\":17,\"name\":\"r\",\"description\":\"r\",\"state\":0,\"type\":0}]"
+				}
+			]
+		},
+		{
+			"name": "updateDevice",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "name",
+						"value": "abc",
+						"type": "default",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\":\"Lampara 1\",\"description\":\"Luz living\",\"state\":0,\"type\":false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/device/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"device",
+						"1"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "abc",
+							"disabled": true
+						},
+						{
+							"key": "descripcion",
+							"value": "test",
+							"disabled": true
+						},
+						{
+							"key": "state",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "type",
+							"value": "0",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "updateDevice",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "name",
+								"value": "abc",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"name\":\"Lampara 1\",\"description\":\"Luz living\",\"state\":0,\"type\":false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/device/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"device",
+								"1"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "abc",
+									"disabled": true
+								},
+								{
+									"key": "descripcion",
+									"value": "test",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "77"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"4d-qEnU2tGdz6mXEtyoHs7d0I1AS7k\""
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 12 Jun 2023 17:06:46 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\"id\":1,\"name\":\"Lampara 1\",\"description\":\"Luz living\",\"state\":0,\"type\":false}"
+				}
+			]
+		},
+		{
+			"name": "updateDeviceState",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "name",
+						"value": "abc",
+						"type": "default",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"state\":true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/device/1/state",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"device",
+						"1",
+						"state"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "abc",
+							"disabled": true
+						},
+						{
+							"key": "descripcion",
+							"value": "test",
+							"disabled": true
+						},
+						{
+							"key": "state",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "type",
+							"value": "0",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "updateDeviceState",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "name",
+								"value": "abc",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/device/1/state",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"device",
+								"1",
+								"state"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "abc",
+									"disabled": true
+								},
+								{
+									"key": "descripcion",
+									"value": "test",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "62"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"3e-7nYVL/1mrAQHBcAfKWA56J4DI1Y\""
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 12 Jun 2023 05:25:41 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\"message\":\"Dispositivo cambio de estado\",\"id\":1,\"state\":true}"
+				}
+			]
+		},
+		{
+			"name": "insertDevice",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "name",
+						"value": "abc",
+						"type": "default",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"name\":\"Equipo 1\",\"description\":\"Descripcion para equipo 1\",\"state\":true,\"type\":0\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/device",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"device"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "abc",
+							"disabled": true
+						},
+						{
+							"key": "descripcion",
+							"value": "test",
+							"disabled": true
+						},
+						{
+							"key": "state",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "type",
+							"value": "0",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "insertDevice",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "name",
+								"value": "abc",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"name\":\"Equipo 1\",\"description\":\"Descripcion para equipo 1\",\"state\":true,\"type\":0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/device",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"device"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "abc",
+									"disabled": true
+								},
+								{
+									"key": "descripcion",
+									"value": "test",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "91"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"5b-+JiA9BeBqxcGRY3t+opKgfTGdZA\""
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 12 Jun 2023 05:26:13 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\"id\":20,\"name\":\"Equipo 1\",\"description\":\"Descripcion para equipo 1\",\"state\":true,\"type\":0}"
+				}
+			]
+		},
+		{
+			"name": "deleteDevice",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/plain",
+						"type": "default",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8000/device/19",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"device",
+						"19"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "abc",
+							"disabled": true
+						},
+						{
+							"key": "descripcion",
+							"value": "test",
+							"disabled": true
+						},
+						{
+							"key": "state",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "type",
+							"value": "0",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "deleteDevice",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/plain",
+								"type": "default",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8000/device/19",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"device",
+								"19"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "abc",
+									"disabled": true
+								},
+								{
+									"key": "descripcion",
+									"value": "test",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "0",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "50"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"32-+/jN+8mV06aC1J3HLM5nA3D5Cgk\""
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 12 Jun 2023 05:26:23 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\"message\":\"Dispositivo eliminado, id:19\",\"id\":19}"
+				}
+			]
+		}
+	]
+}

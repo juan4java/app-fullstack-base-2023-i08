@@ -64,5 +64,4 @@ class services {
             xmlReq.send()
         }
     }
-
 }

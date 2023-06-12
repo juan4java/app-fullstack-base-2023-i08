@@ -1,21 +1,18 @@
-<a href="https://www.gotoiot.com/">
-    <img src="doc/gotoiot-logo.png" alt="logo" title="Goto IoT" align="right" width="60" height="60" />
-</a>
-
-Web App Full Stack Base
+Tp Final DAW
 =======================
 
-*Ayudaría mucho si apoyaras este proyecto con una ⭐ en Github!*
+Este es el Tp Final para Desarrollo de aplicaciones web - CEIoT - 8va Cohorte 2023 - 2do bimestre
 
-Este proyecto es una aplicación web fullstack que se ejecuta sobre el ecosistema `Docker`. Está compuesta por un compilador de `TypeScript` que te permite utilizar este superset de JavaScript para poder programar un `cliente web`. También tiene un servicio en `NodeJS` que te permite ejecutar código en backend y al mismo tiempo disponibilizar el código del cliente web para interactar con el servicio. Además tiene una `base de datos` MySQL que puede interactuar con el backend para guardar y consultar datos, y de manera adicional trae un `administrador` de base de datos para poder administrar la base en caso que lo necesites.
+El proyecto se basa en el original, pero con algunos ajustes para permitir cubrir las funcionalidades siguientes:
+- Listar dispositivos existentes
+- Interactuar con un dispositivo
+-- Apagarlo o encenderlo
+-- Eliminarlo
+- Editar cualquier valor de un dispositivo
 
-La aplicación IoT de base que viene con este proyecto se encarga de crear una tabla llamada `Devices` en la base de datos, y la idea es que vos puedas desarrollar el código de backend y frontend que te permita controlar desde el navegador el estado de los devices de un hogar inteligente - *como pueden ser luces, TVs, ventiladores, persianas, enchufes y otros* - y almacenar los estados de cada uno en la base de datos. 
+La aplicación IoT de base que viene con este proyecto se encarga de crear una tabla llamada `Devices` en la base de datos
 
-Realizando estas tareas vas a a tener una aplicación fullstack IoT del mundo real que utiliza tecnologías actuales en la que un backend es capaz de interactuar con una DB para cumplir con las peticiones de control que se le mandan desde el cliente web.
-
-En esta imagen podés ver una posible implementación del cliente web que controla los artefactos del hogar.
-
-![architecture](doc/webapp-example-1.png)
+![architecture](doc/home.jpg)
 
 ## Comenzando 🚀
 
@@ -35,13 +32,12 @@ Continua con la descarga del código cuando tengas las dependencias instaladas y
 
 ### Descargar el código
 
-Para descargar el código, lo más conveniente es que realices un `fork` de este proyecto a tu cuenta personal haciendo click en [este link](https://github.com/gotoiot/app-fullstack-base/fork). Una vez que ya tengas el fork a tu cuenta, descargalo con este comando (acordate de poner tu usuario en el link):
-
 ```
-git clone https://github.com/USER/app-fullstack-base.git
+git clone https://github.com/juan4java/app-fullstack-base-2023-i08.git
 ```
+El proyecto esta en el branch TpFinal:
+https://github.com/juan4java/app-fullstack-base-2023-i08/tree/TpFinal
 
-> En caso que no tengas una cuenta en Github podes clonar directamente este repo.
 
 ### Ejecutar la aplicación
 
@@ -55,8 +51,6 @@ Si pudiste acceder al cliente web y al administrador significa que la aplicació
 
 </details>
 
-Continuá explorando el proyecto una vez que lo tengas funcionando.
-
 ## Configuraciones de funcionamiento 🔩
 
 Al crearse la aplicación se ejecutan los contenedores de Docker de cada servicio, se crea la base de datos y sus tablas. A continuación podés encontrar info si querés cambiar la estructura de la DB o bien sus configuraciones de acceso.
@@ -67,20 +61,11 @@ Al crearse la aplicación se ejecutan los contenedores de Docker de cada servici
 
 Como ya comprobaste, para acceder PHPMyAdmin tenés que ingresar en la URL [localhost:8001/](http://localhost:8001/). En el login del administrador, el usuario para acceder a la db es `root` y contraseña es la variable `MYSQL_ROOT_PASSWORD` del archivo `docker-compose.yml`.
 
-Para el caso del servicio de NodeJS que se comunica con la DB fijate que en el archivo `src/backend/mysql-connector.js` están los datos de acceso para ingresar a la base.
-
-Si quisieras cambiar la contraseña, puertos, hostname u otras configuraciones de la DB deberías primero modificar el servicio de la DB en el archivo `docker-compose.yml` y luego actualizar las configuraciones para acceder desde PHPMyAdmin y el servicio de NodeJS.
-
 ### Estructura de la DB
 
-Al iniciar el servicio de la base de datos, si esta no está creada toma el archivo que se encuentra en `db/dumps/smart_home.sql` para crear la base de datos automáticamente.
-
-En ese archivo está la configuración de la tabla `Devices` y otras configuraciones más. Si quisieras cambiar algunas configuraciones deberías modificar este archivo y crear nuevamente la base de datos para que se tomen en cuenta los cambios.
-
-Tené en cuenta que la base de datos se crea con permisos de superusuario por lo que no podrías borrar el directorio con tu usuario de sistema, para eso debés hacerlo con permisos de administrador. En ese caso podés ejecutar el comando `sudo rm -r db/data` para borrar el directorio completo.
+Se respeta el archivo inicial de datos en  `db/dumps/smart_home.sql` para crear la base de datos automáticamente.
 
 </details>
-
 
 ## Detalles principales 🔍
 
@@ -88,12 +73,6 @@ En esta sección vas a encontrar las características más relevantes del proyec
 
 <details><summary><b>Mira los detalles más importantes de la aplicación</b></summary><br>
 <br>
-
-### Arquitectura de la aplicación
-
-Como ya pudiste ver, la aplicación se ejecuta sobre el ecosistema Docker, y en esta imagen podés ver el diagrama de arquitectura.
-
-![architecture](doc/architecture.png)
 
 ### El cliente web
 
@@ -140,6 +119,7 @@ En la siguiente ilustración podés ver cómo está organizado el proyecto para 
 │       ├── static              # donde alojan archivos de estilos, imagenes, fuentes, etc.
 │       ├── ts                  # donde se encuentra el codigo TypeScript a desarrollar
 │       └── index.html          # archivo principal del cliente HTML
+├── resources                   # recursos para consumo de apis desde postman
 ├── docker-compose.yml          # archivo donde se aloja la configuracion completa
 ├── README.md                   # este archivo
 ├── CHANGELOG.md                # archivo para guardar los cambios del proyecto
@@ -158,98 +138,118 @@ En esta sección podés ver los detalles específicos de funcionamiento del cód
 
 ### Agregar un dispositivo
 
-Completá los pasos para agregar un dispositivo desde el cliente web.
+Hacer click sobre el boton crear, completar los datos 
+* No se validan duplicados ya que el id se asigna al crearlo y es lo unico que diferencia los dispoitivos
+* Al crear un dispositivo se listan nuevamente todos los dispositivos
+![architecture](doc/crear.jpg)
+
+### Eliminar un dispositivo
+
+Hacer click sobre cualquier elemento de la lista
+* Click en el icono cesto de basura
+* Hacer click en el boton confirmar del mensaje de advertencia
+* Automanticamente se eliminara el dispoitivo de la lista
+![architecture](doc/borrar.jpg)
+
+### Editar un dispoitivo
+
+Hacer click sobre cualquier elemento de la lista
+* Click en el enlace <b>Editar</b> se abrira un popup
+* Modificar los valores a gusto
+* Click en el boton "Actualizar", automaticamente se actualizaran todos los datos relacionados en pantalla
+![architecture](doc/editar.jpg)
+
+### Apagar/Encender un dispoitivo
+
+Hacer click sobre cualquier elemento de la lista
+* Click en el enlace <b>Encender o Apagar</b> se enviara el pedido para efectuar la accion
+* Se actualizara el dispositivo con el nuevo valor y sus iconos asociados
+![architecture](doc/apagar.jpg)
 
 ### Frontend
 
-Completá todos los detalles sobre cómo armaste el frontend, sus interacciones, etc.
+Se Definio:
+Clase (Device.ts) que representa un dispositivo.
+* Se mantivo que el tipo de dispositivo sea numerico
+* El estado es un boolean , puede estar encendido o apagado
+* Descripcion y nombre son textos
+* El id es unico
+
+Class main.ts
+* Se uso el patron singleton, de forma tal que internamente es una unica static
+* Todas los cambios que se efectuan e informan al usuario son posterior al retorno del backend, por lo que no deberia cambiar la pantalla en caso de que el backend responda con error 
+* En el evento load se agregan los listeners por cada elemento que requiere interaccion
+* Se definen algunos enum para facilitar el tipeo y seguimiento de codigo, evitando una proliferancion de texto en el codigo
+* Se implementan dos interfaces (EventListenerObject, HttpCallback), una para manejar eventos del usuario y otra para manejar respuestas del backend
+* Las llamadas al backend es el ultimo paso ante el manejo de eventos, luego se pasa a emplear la class services.ts
+* Para manejar la respuesta del backend, se emplea la firma : handleServiceResponse, donde mediante un switch se realiza la accion requerida
+* Si el backend retorna un error distinto de 200, el switch para manejar el backend sale por la condicion default, y no toma accion sobre la interfaz web
+* El manejo de eventos asociados a la lista, es concatenando como ultimo el id de la lista retornada del backend, mediante este id luego se pueden recuperar todos los datos que pudieran ser necesarios
+* Eliminar un dispositivo , ante una respuesta ok, lo quita de la lista, tambien lo quita si no existe (esto puede deberse a una falta de actualizacion del navegador)
+* Ante cada accion se muestra un mensaje (TOAST) para informar la accion efectuada o el error producido
+
+class service.ts
+* Se define una firma por cada accion, que luego implementan un servicio comun para el llamado al backend
+* Eliminar un dispostivo
+* Agregar un dispositivo
+* Obtener todos los dispositivos
+* Actualizar un dispositivo
+* Actualizar el estado de un dispositivo
+
+interface HttpCallback.ts
+* Permite a quien la implementa hacer un manejo de las respuestas de acuerdo al tipo de operacion invocadas
 
 ### Backend
 
-Completá todos los detalles de funcionamiento sobre el backend, sus interacciones con el cliente web, la base de datos, etc.
+Validaciones
+* Se validan los campos, para que existan todos los campos requeridos
+* La validacion de campos se hace mediante un switch , para indicar campo y que se aplique la validacion correspondiente
+* Se valida el tipo de datos cuando es un id a numerico, siendo valido 0001 como 1, ademas de respetar el largo de base de datos
+* Se valida que los tipos para campos state y type sean boleanos 
+* Se valida largo de los campos name y descripcion
+* Si algun campo falla se retorna un error generico del tipo 400
 
 <details><summary><b>Ver los endpoints disponibles</b></summary><br>
 
-Completá todos los endpoints del backend con los metodos disponibles, los headers y body que recibe, lo que devuelve, ejemplos, etc.
 
-1) Devolver el estado de los dispositivos.
+1) GET el estado de los dispositivos.
 
 ```json
-{
-    "method": "get",
-    "request_headers": "application/json",
-    "request_body": "",
-    "response_code": 200,
-    "request_body": {
-        "devices": [
-            {
-                "id": 1,
-                "status": true,
-                "description": "Kitchen light"
-            }
-        ]
-    },
-}
+curl --location 'http://localhost:8000/devices'
+``` 
+
+2) PUT crear dispotivo
+```json
+curl --location 'http://localhost:8000/device/1' \
+--header 'Content-Type: application/json' \
+--data '{
+   "name":"Lampara 1","description":"Luz living","state":0,"type":false
+}'
+```
+3) POST update state device.
+
+```json
+curl --location 'http://localhost:8000/device/1/state' \
+--header 'Content-Type: application/json' \
+--data '{
+    "state":true
+}'
+``` 
+
+4) POST update quipo.
+
+```json
+curl --location --request PUT 'http://localhost:8000/device' \
+--header 'Content-Type: application/json' \
+--data '{
+   "name":"Equipo 1","description":"Descripcion para equipo 1","state":true,"type":0
+}'
+``` 
+
+4) DELETE borrar device.
+
+```json
+curl --location --request DELETE 'http://localhost:8000/device/19'
 ``` 
 
 </details>
-
-</details>
-
-
-## Tecnologías utilizadas 🛠️
-
-En esta sección podés ver las tecnologías más importantes utilizadas.
-
-<details><summary><b>Mira la lista completa de tecnologías</b></summary><br>
-
-* [Docker](https://www.docker.com/) - Ecosistema que permite la ejecución de contenedores de software.
-* [Docker Compose](https://docs.docker.com/compose/) - Herramienta que permite administrar múltiples contenedores de Docker.
-* [Node JS](https://nodejs.org/es/) - Motor de ejecución de código JavaScript en backend.
-* [MySQL](https://www.mysql.com/) - Base de datos para consultar y almacenar datos.
-* [PHPMyAdmin](https://www.phpmyadmin.net/) - Administrador web de base de datos.
-* [Material Design](https://material.io/design) - Bibliotecas de estilo responsive para aplicaciones web.
-* [TypeScript](https://www.typescriptlang.org/) - Superset de JavaScript tipado y con clases.
-
-</details>
-
-## Contribuir 🖇️
-
-Si estás interesado en el proyecto y te gustaría sumar fuerzas para que siga creciendo y mejorando, podés abrir un hilo de discusión para charlar tus propuestas en [este link](https://github.com/gotoiot/app-fullstack-base/issues/new). Así mismo podés leer el archivo [Contribuir.md](https://github.com/gotoiot/gotoiot-doc/wiki/Contribuir) de nuestra Wiki donde están bien explicados los pasos para que puedas enviarnos pull requests.
-
-## Sobre Goto IoT 📖
-
-Goto IoT es una plataforma que publica material y proyectos de código abierto bien documentados junto a una comunidad libre que colabora y promueve el conocimiento sobre IoT entre sus miembros. Acá podés ver los links más importantes:
-
-* **[Sitio web](https://www.gotoiot.com/):** Donde se publican los artículos y proyectos sobre IoT. 
-* **[Github de Goto IoT:](https://github.com/gotoiot)** Donde están alojados los proyectos para descargar y utilizar. 
-* **[Comunidad de Goto IoT:](https://groups.google.com/g/gotoiot)** Donde los miembros de la comunidad intercambian información e ideas, realizan consultas, solucionan problemas y comparten novedades.
-* **[Twitter de Goto IoT:](https://twitter.com/gotoiot)** Donde se publican las novedades del sitio y temas relacionados con IoT.
-* **[Wiki de Goto IoT:](https://github.com/gotoiot/doc/wiki)** Donde hay información de desarrollo complementaria para ampliar el contexto.
-
-## Muestas de agradecimiento 🎁
-
-Si te gustó este proyecto y quisieras apoyarlo, cualquiera de estas acciones estaría más que bien para nosotros:
-
-* Apoyar este proyecto con una ⭐ en Github para llegar a más personas.
-* Sumarte a [nuestra comunidad](https://groups.google.com/g/gotoiot) abierta y dejar un feedback sobre qué te pareció el proyecto.
-* [Seguirnos en twitter](https://github.com/gotoiot/doc/wiki) y dejar algún comentario o like.
-* Compartir este proyecto con otras personas.
-
-## Autores 👥
-
-Las colaboraciones principales fueron realizadas por:
-
-* **[Agustin Bassi](https://github.com/agustinBassi)**: Ideación, puesta en marcha y mantenimiento del proyecto.
-* **[Ernesto Giggliotti](https://github.com/ernesto-g)**: Creación inicial del frontend, elección de Material Design.
-* **[Brian Ducca](https://github.com/brianducca)**: Ayuda para conectar el backend a la base de datos, puesta a punto de imagen de Docker.
-
-También podés mirar todas las personas que han participado en la [lista completa de contribuyentes](https://github.com/###/contributors).
-
-## Licencia 📄
-
-Este proyecto está bajo Licencia ([MIT](https://choosealicense.com/licenses/mit/)). Podés ver el archivo [LICENSE.md](LICENSE.md) para más detalles sobre el uso de este material.
-
----
-
-**Copyright © Goto IoT 2021** ⌨️ [**Website**](https://www.gotoiot.com) ⌨️ [**Group**](https://groups.google.com/g/gotoiot) ⌨️ [**Github**](https://www.github.com/gotoiot) ⌨️ [**Twitter**](https://www.twitter.com/gotoiot) ⌨️ [**Wiki**](https://github.com/gotoiot/doc/wiki)
