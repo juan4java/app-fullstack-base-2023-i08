@@ -35,13 +35,15 @@ Continua con la descarga del código cuando tengas las dependencias instaladas y
 ```
 git clone https://github.com/juan4java/app-fullstack-base-2023-i08.git
 ```
-El proyecto esta en el branch TpFinal:
-https://github.com/juan4java/app-fullstack-base-2023-i08/tree/TpFinal
+El proyecto esta en el branch TpFinal, que es el branch por defecto por lo que se puede iniciar mediante un docker-compose up
 
+https://github.com/juan4java/app-fullstack-base-2023-i08/tree/TpFinal
 
 ### Ejecutar la aplicación
 
 Para ejecutar la aplicación tenes que correr el comando `docker-compose up` desde la raíz del proyecto. Este comando va a descargar las imágenes de Docker de node, de typescript, de la base datos y del admin de la DB, y luego ponerlas en funcionamiento. 
+Si por alguna razon la pagina se queda cargando al iniciar, se debe hacer un ctrl+c para cancelar la ejecucion del docker y 
+lanzarlo nuevamente, con eso ya se inicia
 
 Para acceder al cliente web ingresa a a la URL [http://localhost:8000/](http://localhost:8000/) y para acceder al admin de la DB accedé a [localhost:8001/](http://localhost:8001/). 
 
