@@ -42,14 +42,16 @@ https://github.com/juan4java/app-fullstack-base-2023-i08/tree/TpFinal
 ### Ejecutar la aplicación
 
 Para ejecutar la aplicación tenes que correr el comando `docker-compose up` desde la raíz del proyecto. Este comando va a descargar las imágenes de Docker de node, de typescript, de la base datos y del admin de la DB, y luego ponerlas en funcionamiento. 
-Si por alguna razon la pagina se queda cargando al iniciar, se debe hacer un ctrl+c para cancelar la ejecucion del docker y 
-lanzarlo nuevamente, con eso ya se inicia
 
 Para acceder al cliente web ingresa a a la URL [http://localhost:8000/](http://localhost:8000/) y para acceder al admin de la DB accedé a [localhost:8001/](http://localhost:8001/). 
 
+Si la primer vez la pagina queda cargando, se debe hacer `docker-compose stop` y luego `docker-compose up`
+> Si te aparece un error la primera vez que corres la app, deteńe el proceso y volvé a iniciarla. Esto es debido a que el backend espera que la DB esté creada al iniciar, y en la primera ejecución puede no alcanzar a crearse. A partir de la segunda vez el problema queda solucionado.
+
+![architecture](doc/loading.jpg)
+
 Si pudiste acceder al cliente web y al administrador significa que la aplicación se encuentra corriendo bien. 
 
-> Si te aparece un error la primera vez que corres la app, deteńe el proceso y volvé a iniciarla. Esto es debido a que el backend espera que la DB esté creada al iniciar, y en la primera ejecución puede no alcanzar a crearse. A partir de la segunda vez el problema queda solucionado.
 
 </details>
 
