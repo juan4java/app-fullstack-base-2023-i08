@@ -90,4 +90,5 @@ typings/
 db/data/
 src/frontend/js
 
-
+#Archivos de vscode
+.vscode/
